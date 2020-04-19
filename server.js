@@ -5,7 +5,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const todoRoutes = express.Router();
 let Todo = require('./todo.model');app.use(cors());
-var path = require('path');
+const path = require('path');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true})); 
