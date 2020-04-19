@@ -67,11 +67,12 @@ export default class EditTodo extends Component {
             todo_priority: this.state.todo_priority,
             todo_completed: this.state.todo_completed
         };
-        console.log(obj);
         axios.post('/api/update/'+this.props.match.params.id, obj)
-            .then(res => console.log(res.data));
-        
-        this.props.history.push('/');
+            .then(function (res) {
+                if(res.status == 200){
+                    window.location = "/"
+                }
+            });
     }
 
     render() {
