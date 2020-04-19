@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const todoRoutes = express.Router();
-const PORT = 4000;
 let Todo = require('./todo.model');app.use(cors());
 
 app.use(bodyParser.json());mongoose.connect('mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Todo?retryWrites=true&w=majority', { useNewUrlParser: true });
@@ -59,7 +58,8 @@ todoRoutes.route('/add').post(function(req, res) {
             res.status(400).send('adding new todo failed');
         });
 });
-
-app.use('/todos', todoRoutes);app.listen(PORT, function() {
-    console.log("Server is running on Port: " + PORT);
+const port = process.env.PORT || 4000;
+app.use('/api', todoRoutes);
+app.listen(port, function() {
+    console.log("Server is running on Port: " + port);
 });
