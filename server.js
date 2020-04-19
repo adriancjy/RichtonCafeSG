@@ -6,7 +6,8 @@ const mongoose = require('mongoose');
 const todoRoutes = express.Router();
 let Todo = require('./todo.model');app.use(cors());
 
-app.use(bodyParser.json());mongoose.connect('mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Todo?retryWrites=true&w=majority', { useNewUrlParser: true });
+app.use(bodyParser.json());
+mongoose.connect('mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Todo?retryWrites=true&w=majority', { useNewUrlParser: true });
 
 const connection = mongoose.connection;
 connection.once('open', function() {
@@ -58,6 +59,15 @@ todoRoutes.route('/add').post(function(req, res) {
             res.status(400).send('adding new todo failed');
         });
 });
+
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static( 'client/build' ));
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, 'client', 'build', 'index.html')); // relative path
+    });
+}
+
 const port = process.env.PORT || 4000;
 app.use('/api', todoRoutes);
 app.listen(port, function() {
