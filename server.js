@@ -14,7 +14,7 @@ connection.once('open', function() {
     console.log("MongoDB database connection established successfully");
 });
 
-todoRoutes.route('/').get(function(req, res) {
+todoRoutes.route('/getAlldata').get(function(req, res) {
     Todo.find(function(err, todo) {
         if (err) {
             console.log(err);
