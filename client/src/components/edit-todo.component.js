@@ -69,9 +69,7 @@ export default class EditTodo extends Component {
         };
         axios.post('/api/update/'+this.props.match.params.id, obj)
             .then(function (res) {
-                if(res.status == 200){
-                    window.location = "/"
-                }
+                    window.location = "/"      
             });
     }
 

@@ -7,6 +7,7 @@ const todoRoutes = express.Router();
 let Todo = require('./todo.model');app.use(cors());
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true})); 
 mongoose.connect('mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Todo?retryWrites=true&w=majority', { useNewUrlParser: true });
 
 const connection = mongoose.connection;
