@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import CreateTodo from "./components/create-todo.component";
 import EditTodo from "./components/edit-todo.component";
 import TodosList from "./components/todo-list.component";
+import MenuList from "./components/menu";
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
     <div className="App">
     <div className="container">
           <nav className="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="https://codingthesmartway.com" target="_blank">
+            <a className="navbar-brand" href="https://codingthesmartway.com" target="_blank">
               <img src={logo} width="30" height="30" alt="CodingTheSmartWay.com" />
             </a>
             <Link to="/" className="navbar-brand">MERN-Stack Todo App</Link>
@@ -33,6 +34,7 @@ function App() {
           <Route path="/" exact component={TodosList} />
           <Route path="/edit/:id" component={EditTodo} />
           <Route path="/create" component={CreateTodo} />
+          <Route path="/menu" component={MenuList} />
         </div>
         </div>
       </Router>

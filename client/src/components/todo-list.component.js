@@ -16,12 +16,15 @@ const Todo = props => (
 export default class TodosList extends Component {
     constructor(props) {
         super(props);
-        this.state = {todos: []};
+        this.state = {
+            todos: []
+        };
     }
 
     componentDidMount() {
-        axios.get('/api/getAlldata')
+        axios.get('/api/todo/getAlldata')
             .then(response => {
+                console.log(response.data);
                 this.setState({ todos: response.data });
             })
             .catch(function (error){

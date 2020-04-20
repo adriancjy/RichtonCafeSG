@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;let Todos = new Schema({
+const Schema = mongoose.Schema;
+let Todos = new Schema({
     todo_description: {
         type: String
     },
@@ -13,4 +14,4 @@ const Schema = mongoose.Schema;let Todos = new Schema({
         type: Boolean
     }
                    /*mongoose.model('','collection name')*/
-});module.exports = mongoose.model('Todo', Todos, 'Todo');
+});module.exports = mongoose.model('todo', Todos, 'Todo');

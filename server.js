@@ -4,19 +4,22 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const todoRoutes = express.Router();
-let Todo = require('./todo.model');app.use(cors());
+const apiRoute = express.Router();
+let Todo = require('./model/todo.model');
+let Menu = require('./model/menu.model');
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true})); 
-mongoose.connect('mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Todo?retryWrites=true&w=majority', { useNewUrlParser: true });
+mongoose.connect('mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Richton?retryWrites=true&w=majority', { useNewUrlParser: true });
 
 const connection = mongoose.connection;
 connection.once('open', function() {
     console.log("MongoDB database connection established successfully");
 });
 
-todoRoutes.route('/getAlldata').get(function(req, res) {
+//todo API route -- to be deleted.
+apiRoute.route('/todo/getAlldata').get(function(req, res) {
     Todo.find(function(err, todo) {
         if (err) {
             console.log(err);
@@ -26,14 +29,14 @@ todoRoutes.route('/getAlldata').get(function(req, res) {
     });
 });
 
-todoRoutes.route('/:id').get(function(req, res) {
+apiRoute.route('/todo/:id').get(function(req, res) {
     let id = req.params.id;
     Todo.findById(id, function(err, todo) {
         res.json(todo);
     });
 });
 
-todoRoutes.route('/update/:id').post(function(req, res) {
+apiRoute.route('/todo/update/:id').post(function(req, res) {
     Todo.findById(req.params.id, function(err, todo) {
         if (!todo)
             res.status(404).send("data is not found");
@@ -51,7 +54,7 @@ todoRoutes.route('/update/:id').post(function(req, res) {
     });
 });
 
-todoRoutes.route('/add').post(function(req, res) {
+apiRoute.route('/todo/add').post(function(req, res) {
     let todo = new Todo(req.body);
     todo.save()
         .then(todo => {
@@ -62,6 +65,20 @@ todoRoutes.route('/add').post(function(req, res) {
         });
 });
 
+
+//Richton Menu testing api route
+
+apiRoute.route('/richton/getMenuData').get(function(req, res) {
+    Menu.find(function(err, menu) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(menu);
+            res.json(menu);
+        }
+    });
+});
+
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static( 'client/build' ));
 
@@ -69,7 +86,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const port = process.env.PORT || 4000;
-app.use('/api', todoRoutes);
+app.use('/api', apiRoute);
 app.listen(port, function() {
     console.log("Server is running on Port: " + port);
 });
