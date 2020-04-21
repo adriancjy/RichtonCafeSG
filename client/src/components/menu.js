@@ -7,11 +7,12 @@ import {
   } from "mui-checkboxlist";
   import _ from "lodash";
 
-const Menu = props => (
+  const Menu = props => (
     <tr>
         <td>{props.menu.menu_item_name}</td>
         <td>{props.menu.menu_item_price}</td>
         <td>{props.menu.menu_item_availability}</td>
+        <td><input type="checkbox" onClick={() => { window.menuComponent.onClickCheckbox([props.menu.menu_item_name, props.menu.menu_item_price])}}/></td>
         {/* <td> */}
             {/* <Link to={"/edit/"+props.todo._id}>Edit</Link> */}
         {/* </td> */}
@@ -19,8 +20,10 @@ const Menu = props => (
 )
 
 export default class MenuList extends Component {
+    
     constructor(props) {
         super(props);
+        window.menuComponent = this;
         this.state = {
             menuList: [],
             hisFavoriteFruit: [],
@@ -28,7 +31,10 @@ export default class MenuList extends Component {
             edit: true,
             checkboxMenuItems: []
         };
+        this.onClickCheckbox = this.onClickCheckbox.bind(this);
     }
+
+    
 
     handleChange = field => values => {
         this.setState({ [field]: values });
@@ -57,12 +63,16 @@ export default class MenuList extends Component {
 
     mapObjecttoArray(){
         _.map(this.state.menuList, item => {
-            console.log(item);
             this.setState({checkboxMenuItems: [...this.state.checkboxMenuItems, {label: `${item.menu_item_name}`, value: `${item.menu_item_price}`}]});
         })
     }
 
+    onClickCheckbox(e){
+        console.log(e);
+    }
+
     render() {
+        
         
         const labelValueListItems = [
             { label: "apple",  value: "90" },
@@ -71,7 +81,6 @@ export default class MenuList extends Component {
             { label: "pear", value: "100" },
             { label: "raspberry", value: "40" }
           ];
-          
         return (
             <div>
                 <h3>Menu List</h3>
@@ -84,20 +93,17 @@ export default class MenuList extends Component {
                         </tr>
                     </thead>
                     <tbody>
-                    {/* { this.menuItemList() } */}
+                    { this.menuItemList() }
 
-                    <div>
+                    {/* <div>
           <CheckboxLabelValueSelect
             disabled={!this.state.edit}
             label="Her Favorite Food"
             limit={{ max: 3, deleteLast: true }}
-            listItems={labelValueListItems}
+            listItems={this.state.checkboxMenuItems}
             onChange={this.handleChange("herFavoriteFruit")}
             searchBarLabel="Trial"
-            selectedItems={[
-              { label: "orange", value: "70" },
-              { label: "raspberry", value: "40" }
-            ]}
+           
             statusBar
             style={{
               listContainer: {
@@ -110,7 +116,7 @@ export default class MenuList extends Component {
           {_.map(this.state.herFavoriteFruit, item => {
             return <div>{`${item.label}: $${item.value}`}</div>;
           })}
-        </div>
+        </div> */}
                     </tbody>
                 </table>
             </div>
