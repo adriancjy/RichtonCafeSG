@@ -11,7 +11,9 @@ app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true})); 
-mongoose.connect('mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Richton?retryWrites=true&w=majority', { useNewUrlParser: true });
+//'mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Richton?retryWrites=true&w=majority';
+const url = process.env.MONGO_URL;
+mongoose.connect(url, { useUnifiedTopology: true, useNewUrlParser: true });
 
 const connection = mongoose.connection;
 connection.once('open', function() {
