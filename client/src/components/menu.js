@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 // import { Link } from 'react-router-dom';
 import axios from 'axios';
+import {
+    CheckboxLabelValueSelect,
+    CheckboxValueSelect
+  } from "mui-checkboxlist";
+  import _ from "lodash";
 
 const Menu = props => (
     <tr>
@@ -17,17 +22,25 @@ export default class MenuList extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            menuList: {}
+            menuList: [],
+            hisFavoriteFruit: [],
+            herFavoriteFruit: [],
+            edit: true,
+            checkboxMenuItems: []
         };
     }
+
+    handleChange = field => values => {
+        this.setState({ [field]: values });
+      };
 
 
 
     componentDidMount() {
         axios.get('/api/richton/getMenuData')
             .then(response => {
-                var data = response.data[0]['menuitem'];
-                this.setState({ menuList: data });
+                this.setState({menuList: response.data});
+                this.mapObjecttoArray();
             })
             .catch(function (error){
                 console.log(error);
@@ -35,15 +48,30 @@ export default class MenuList extends Component {
     }
     
     menuItemList() {
-        var list = this.state.menuList;
-        return Object.keys(this.state.menuList).map(function(currentMenuList, i){
-                return <Menu menu={list[currentMenuList]} key={i} />;
+        // return Object.keys(this.state.menuList).map(function(currentMenuList, i){
+        //         return <Menu menu={list[currentMenuList]} key={i} />;
+        return this.state.menuList.map(function(currentTodo, i){
+            return <Menu menu={currentTodo} key={i} />;
             })
-        
-        
+    }
+
+    mapObjecttoArray(){
+        _.map(this.state.menuList, item => {
+            console.log(item);
+            this.setState({checkboxMenuItems: [...this.state.checkboxMenuItems, {label: `${item.menu_item_name}`, value: `${item.menu_item_price}`}]});
+        })
     }
 
     render() {
+        
+        const labelValueListItems = [
+            { label: "apple",  value: "90" },
+            { label: "banana", value: "50" },
+            { label: "orange", value: "70" },
+            { label: "pear", value: "100" },
+            { label: "raspberry", value: "40" }
+          ];
+          
         return (
             <div>
                 <h3>Menu List</h3>
@@ -56,7 +84,33 @@ export default class MenuList extends Component {
                         </tr>
                     </thead>
                     <tbody>
-                        { this.menuItemList() }
+                    {/* { this.menuItemList() } */}
+
+                    <div>
+          <CheckboxLabelValueSelect
+            disabled={!this.state.edit}
+            label="Her Favorite Food"
+            limit={{ max: 3, deleteLast: true }}
+            listItems={labelValueListItems}
+            onChange={this.handleChange("herFavoriteFruit")}
+            searchBarLabel="Trial"
+            selectedItems={[
+              { label: "orange", value: "70" },
+              { label: "raspberry", value: "40" }
+            ]}
+            statusBar
+            style={{
+              listContainer: {
+                height: "150px"
+              }
+            }}
+          />
+        </div>
+        <div style={{ padding: "10px" }}>
+          {_.map(this.state.herFavoriteFruit, item => {
+            return <div>{`${item.label}: $${item.value}`}</div>;
+          })}
+        </div>
                     </tbody>
                 </table>
             </div>

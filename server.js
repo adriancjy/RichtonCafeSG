@@ -73,7 +73,6 @@ apiRoute.route('/richton/getMenuData').get(function(req, res) {
         if (err) {
             console.log(err);
         } else {
-            console.log(menu);
             res.json(menu);
         }
     });
