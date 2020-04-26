@@ -4,6 +4,7 @@ import axios from 'axios';
 import _ from "lodash";
 import Accordion from 'react-bootstrap/Accordion';
 import Card from 'react-bootstrap/Card';
+import { Spinner } from "react-bootstrap";
 
 const divStyle = {
     overflowY: 'auto',
@@ -33,7 +34,8 @@ export default class MenuList extends Component {
             herFavoriteFruit: [],
             edit: true,
             checkboxMenuItems: [],
-            tableHidden: "none"
+            tableHidden: "none",
+            retrieved: false
         };
         this.onClickCheckbox = this.onClickCheckbox.bind(this);
     }
@@ -49,7 +51,7 @@ export default class MenuList extends Component {
     componentDidMount() {
         axios.get('/api/richton/getMenuData')
             .then(response => {
-                this.setState({ menuList: response.data });
+                this.setState({ menuList: response.data, retrieved: true });
                 this.mapObjecttoArray();
             })
             .catch(function (error) {
@@ -84,6 +86,7 @@ export default class MenuList extends Component {
     render() {
         return (
             <div>
+                {this.state.retrieved ? (<div>
                 <h3 onClick={() => { this.revealTable() }}>Menu List</h3>
 
                 <Accordion defaultActiveKey="0">
@@ -121,7 +124,14 @@ export default class MenuList extends Component {
                     </Card>
                 </Accordion>
 
+            </div>):(<div class="row h-100 page-container">
+            <div class="col-sm-12 my-auto">
+              <h3>Loading</h3>
+              <Spinner class="" animation="grow" />
             </div>
+          </div>)}
+            </div>
+            
         )
     }
 }
