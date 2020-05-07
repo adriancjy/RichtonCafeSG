@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import _ from "lodash";
 import Accordion from 'react-bootstrap/Accordion';
+import { UncontrolledAlert } from 'reactstrap';
 import Card from 'react-bootstrap/Card';
 import { Spinner } from "react-bootstrap";
 
@@ -11,12 +12,19 @@ const divStyle = {
     height: 300
 };
 
+const alertStyle = {
+    display: 'none'
+};
+
+
+
+
 const Menu = props => (
     <tr>
         <td>{props.menu.menu_item_name}</td>
         <td>{props.menu.menu_item_price}</td>
         <td>{props.menu.menu_item_availability}</td>
-        <td><input type="checkbox" onClick={() => { window.menuComponent.onClickCheckbox([props.menu.menu_item_name, props.menu.menu_item_price]) }} /></td>
+        <td><input type="checkbox" id={props.menu._id} onClick={() => { window.menuComponent.onClickCheckbox(props.menu._id, props.menu.menu_item_name, props.menu.menu_item_price) }} /></td>
         {/* <td> */}
         {/* <Link to={"/edit/"+props.todo._id}>Edit</Link> */}
         {/* </td> */}
@@ -30,14 +38,15 @@ export default class MenuList extends Component {
         window.menuComponent = this;
         this.state = {
             menuList: [],
-            hisFavoriteFruit: [],
-            herFavoriteFruit: [],
             edit: true,
             checkboxMenuItems: [],
             tableHidden: "none",
-            retrieved: false
+            retrieved: false,
+            selectedItems: [],
+            mainChecked: false,
         };
         this.onClickCheckbox = this.onClickCheckbox.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
     }
 
 
@@ -73,12 +82,29 @@ export default class MenuList extends Component {
         })
     }
 
-    onClickCheckbox(e) {
-        console.log(e);
+    onClickCheckbox(id, foodName, foodPrice) {
+        const checked = this.state.mainChecked;
+        if(!checked){
+            this.setState({ selectedItems: [...this.state.selectedItems, [foodName, foodPrice]], mainChecked: true});
+        }else{
+            const item = this.state.selectedItems;
+            if(item[0][0] === foodName){
+                this.setState({selectedItems: [], mainChecked: false});
+            }else{
+                var x = document.getElementById(id);
+                x.checked = false;
+                document.getElementById("alertBox").style["display"] = "block";
+            }
+            
+        }
     }
 
     revealTable() {
         this.setState({ tableHidden: "block" })
+    }
+
+    onSubmit() {
+        console.log(this.state.selectedItems);
     }
 
 
@@ -92,8 +118,13 @@ export default class MenuList extends Component {
                 <Accordion defaultActiveKey="0">
                     <Card>
                         <Accordion.Toggle as={Card.Header} eventKey="0">
-                            Click me!
+                            Main food items
                                     </Accordion.Toggle>
+                                    <a id="alertBox" style={alertStyle}>
+                                    <UncontrolledAlert  display={this.state.alertHidden} color="danger">
+                                        Please only select <strong>one</strong> main food item!
+                                    </UncontrolledAlert >
+                                    </a>
                         <Accordion.Collapse eventKey="0">
                             <Card.Body>
                                 <div style={divStyle}>
@@ -123,7 +154,10 @@ export default class MenuList extends Component {
                         </Accordion.Collapse>
                     </Card>
                 </Accordion>
-
+                <div className="form-group">
+                        <input type="submit" onClick={() => {this.onSubmit()}}value="Add new order" className="btn btn-primary" />
+                </div>
+               
             </div>):(<div class="row h-100 page-container">
             <div class="col-sm-12 my-auto">
               <h3>Loading</h3>

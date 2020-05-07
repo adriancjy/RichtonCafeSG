@@ -26,7 +26,6 @@ export default class TodosList extends Component {
     componentDidMount() {
         axios.get('/api/todo/getAlldata')
             .then(response => {
-                console.log(response.data);
                 this.setState({ todos: response.data, retrieved: true });
             })
             .catch(function (error){

@@ -12,7 +12,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true})); 
 //'mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Richton?retryWrites=true&w=majority';
-const url = process.env.MONGO_URL;
+const url = 'mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Richton?retryWrites=true&w=majority';
 mongoose.connect(url, { useUnifiedTopology: true, useNewUrlParser: true });
 
 const connection = mongoose.connection;
