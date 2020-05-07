@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import _ from "lodash";
 import Accordion from 'react-bootstrap/Accordion';
-import { UncontrolledAlert } from 'reactstrap';
+import { Alert } from 'reactstrap';
 import Card from 'react-bootstrap/Card';
 import { Spinner } from "react-bootstrap";
 
@@ -86,6 +86,7 @@ export default class MenuList extends Component {
         const checked = this.state.mainChecked;
         if(!checked){
             this.setState({ selectedItems: [...this.state.selectedItems, [foodName, foodPrice]], mainChecked: true});
+            document.getElementById("alertBox").style["display"] = "none";
         }else{
             const item = this.state.selectedItems;
             if(item[0][0] === foodName){
@@ -121,9 +122,9 @@ export default class MenuList extends Component {
                             Main food items
                                     </Accordion.Toggle>
                                     <a id="alertBox" style={alertStyle}>
-                                    <UncontrolledAlert  display={this.state.alertHidden} color="danger">
+                                    <Alert  display={this.state.alertHidden} color="danger">
                                         Please only select <strong>one</strong> main food item!
-                                    </UncontrolledAlert >
+                                    </Alert >
                                     </a>
                         <Accordion.Collapse eventKey="0">
                             <Card.Body>
