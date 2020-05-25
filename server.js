@@ -7,12 +7,13 @@ const mongoose = require('mongoose');
 const apiRoute = express.Router();
 let Todo = require('./model/todo.model');
 let Menu = require('./model/menu.model');
+let SideDish = require('./model/sidedish.model');
 app.use(cors());
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true})); 
-//'mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Richton?retryWrites=true&w=majority';
-const url = 'mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Richton?retryWrites=true&w=majority';
+app.use(bodyParser.urlencoded({extended: true}));
+const url = process.env.MONGO_URL; 
+// const url = 'mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Richton?retryWrites=true&w=majority';
 mongoose.connect(url, { useUnifiedTopology: true, useNewUrlParser: true });
 
 const connection = mongoose.connection;
@@ -79,6 +80,20 @@ apiRoute.route('/richton/getMenuData').get(function(req, res) {
         }
     });
 });
+
+
+//Richton Sidedish API
+
+apiRoute.route('/richton/getSideDish').get(function(req, res) {
+    SideDish.find(function(err, menu) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.json(menu);
+        }
+    });
+});
+
 
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static( 'client/build' ));

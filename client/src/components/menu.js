@@ -31,6 +31,18 @@ const Menu = props => (
     </tr>
 )
 
+const SideDish = props => (
+    <tr>
+        <td>{props.sidedish.menu_item_name}</td>
+        <td>{props.sidedish.menu_item_price}</td>
+        <td>{props.sidedish.menu_item_availability}</td>
+        <td><input type="checkbox" id={props.sidedish._id} onClick={() => { window.menuComponent.onClickSideDishCheckbox(props.sidedish._id, props.sidedish.menu_item_name, props.sidedish.menu_item_price) }} /></td>
+        {/* <td> */}
+        {/* <Link to={"/edit/"+props.todo._id}>Edit</Link> */}
+        {/* </td> */}
+    </tr>
+)
+
 export default class MenuList extends Component {
 
     constructor(props) {
@@ -38,11 +50,14 @@ export default class MenuList extends Component {
         window.menuComponent = this;
         this.state = {
             menuList: [],
+            sideDishList: [],
             edit: true,
             checkboxMenuItems: [],
+            sideDishCheckBox: [],
             tableHidden: "none",
             retrieved: false,
             selectedItems: [],
+            selectedSideDish: [],
             mainChecked: false,
         };
         this.onClickCheckbox = this.onClickCheckbox.bind(this);
@@ -58,6 +73,7 @@ export default class MenuList extends Component {
 
 
     componentDidMount() {
+        //main dish
         axios.get('/api/richton/getMenuData')
             .then(response => {
                 this.setState({ menuList: response.data, retrieved: true });
@@ -66,26 +82,50 @@ export default class MenuList extends Component {
             .catch(function (error) {
                 console.log(error);
             })
+            //side dish
+            axios.get('/api/richton/getSideDish')
+            .then(response => {
+                this.setState({ sideDishList: response.data, retrieved: true });
+                this.mapSideDishtoArray();
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
     }
 
+    //Main dish
     menuItemList() {
-        // return Object.keys(this.state.menuList).map(function(currentMenuList, i){
-        //         return <Menu menu={list[currentMenuList]} key={i} />;
         return this.state.menuList.map(function (currentTodo, i) {
             return <Menu menu={currentTodo} key={i} />;
         })
     }
 
+    //Side dish 
+    sideDishItemList() {
+        return this.state.sideDishList.map(function (currentTodo, i) {
+            return <SideDish sidedish={currentTodo} key={i} />;
+        })
+    }
+
+    //Richton Main dish
     mapObjecttoArray() {
         _.map(this.state.menuList, item => {
             this.setState({ checkboxMenuItems: [...this.state.checkboxMenuItems, { label: `${item.menu_item_name}`, value: `${item.menu_item_price}` }] });
         })
     }
 
+    //Richton Side dish
+    mapSideDishtoArray() {
+        _.map(this.state.sideDishList, item => {
+            this.setState({ sideDishCheckBox: [...this.state.sideDishCheckBox, { label: `${item.menu_item_name}`, value: `${item.menu_item_price}` }] });
+        })
+    }
+
+    //Main
     onClickCheckbox(id, foodName, foodPrice) {
         const checked = this.state.mainChecked;
         if(!checked){
-            this.setState({ selectedItems: [...this.state.selectedItems, [foodName, foodPrice]], mainChecked: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {label: foodName, price: foodPrice}], mainChecked: true});
             document.getElementById("alertBox").style["display"] = "none";
         }else{
             const item = this.state.selectedItems;
@@ -100,12 +140,26 @@ export default class MenuList extends Component {
         }
     }
 
+    //side
+    onClickSideDishCheckbox(id, foodName, foodPrice) {
+        const selectedSide = this.state.selectedSideDish;
+        if(selectedSide.length == 0){
+            this.setState({ selectedItems: [...this.state.selectedItems, {label: foodName, price: foodPrice}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
+        }else{
+            if(selectedSide.indexOf(foodName) > -1){
+                this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item !== foodName), selectedItems: this.state.selectedItems.filter(item => item.label !== foodName)});
+            }else{
+                this.setState({ selectedItems: [...this.state.selectedItems, {label: foodName, price: foodPrice}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
+            }
+        }
+    }
+
     revealTable() {
         this.setState({ tableHidden: "block" })
     }
 
     onSubmit() {
-        console.log(this.state.selectedItems);
+        console.log(this.state.selectedItems, this.state.selectedSideDish);
     }
 
 
@@ -148,10 +202,24 @@ export default class MenuList extends Component {
                     </Card>
                     <Card>
                         <Accordion.Toggle as={Card.Header} eventKey="1">
-                            Click me!
+                            Side dishes
                                     </Accordion.Toggle>
                         <Accordion.Collapse eventKey="1">
-                            <Card.Body>Hello! I'm another body</Card.Body>
+                            <Card.Body><div style={divStyle}>
+                                    <table className="table table-striped" >
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Price</th>
+                                                <th>Availability</th>
+                                                <th>Select</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            { this.sideDishItemList() } 
+                                        </tbody>
+                                    </table>
+                                </div></Card.Body>
                         </Accordion.Collapse>
                     </Card>
                 </Accordion>
