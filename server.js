@@ -21,6 +21,7 @@ connection.once('open', function() {
     console.log("MongoDB database connection established successfully");
 });
 
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 //todo API route -- to be deleted.
 apiRoute.route('/todo/getAlldata').get(function(req, res) {
@@ -95,13 +96,9 @@ apiRoute.route('/richton/getSideDish').get(function(req, res) {
     });
 });
 
-
-if (process.env.NODE_ENV === 'production') {
-    // app.use(express.static( 'client/build' ));
-    app.use(express.static(__dirname + '/public'));
-    app.get('*', (req,res) => res.sendFile(path.join(__dirname+'/public/index.html')));
-}
-
+app.get('*', (req,res) =>{
+    res.sendFile(path.join(__dirname+'/client/build/index.html'));
+});
 
 
 const port = process.env.PORT || 4000;
