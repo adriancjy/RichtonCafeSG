@@ -107,14 +107,13 @@ apiRoute.route('/richton/getSideDish').get(function(req, res) {
 // });
 // app.use('/', router);
 // }
-app.use(express.static(path.join(__dirname, '../build')))
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../build'))
-})
-
+app.use(express.static(path.join(__dirname, 'client', 'build')))
 
 const port = process.env.PORT || 4000;
 app.use('/api', apiRoute);
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "build", "index.html"));
+});
 app.listen(port, function() {
     console.log("Server is running on Port: " + port);
 });
