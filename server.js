@@ -12,8 +12,8 @@ app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
-const url = process.env.MONGO_URL; 
-// const url = 'mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Richton?retryWrites=true&w=majority';
+// const url = process.env.MONGO_URL; 
+const url = 'mongodb+srv://richtoncafe:zcbm1234A@richtoncafe-fkfp1.mongodb.net/Richton?retryWrites=true&w=majority';
 mongoose.connect(url, { useUnifiedTopology: true, useNewUrlParser: true });
 
 const connection = mongoose.connection;
@@ -21,13 +21,7 @@ connection.once('open', function() {
     console.log("MongoDB database connection established successfully");
 });
 
-if(process.env.NODE_ENV === 'production'){
-    //set static folder
-    app.use(express.static('client/build'));
-}
-app.get('*',(req, res) => {
-    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
-});
+
 
 //todo API route -- to be deleted.
 apiRoute.route('/todo/getAlldata').get(function(req, res) {
