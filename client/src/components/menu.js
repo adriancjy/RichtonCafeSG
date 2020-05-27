@@ -171,15 +171,6 @@ export default class MenuList extends Component {
 
     onSubmit() {
         localStorage.setItem("currentOrders", JSON.stringify(this.state.selectedItems));
-        // var totalItems = this.state.selectedItems;
-        // if(totalItems.length == 0){
-        //     document.getElementById("totalAlert").style["display"] = "block";
-        // }else{
-        //     for(var i = 0; i < totalItems.length; i++){
-        //         document.getElementById(totalItems[i].Id).checked = false;
-        //     }
-        // }
-        // this.props.history.push('/menu');
         window.location.reload(false);
     }
 

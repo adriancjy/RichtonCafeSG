@@ -95,18 +95,6 @@ apiRoute.route('/richton/getSideDish').get(function(req, res) {
     });
 });
 
-
-// if (process.env.NODE_ENV === 'production') {
-//     // app.use(express.static( 'client/build' ));
-// //     const publicPath = path.join(__dirname, '../public');
-// //   app.use(express.static(publicPath));
-// //   app.use('*', express.static(publicPath));
-// const router = express.Router();
-// router.get('/', (req, res) => {
-//     res.sendfile(path.join(__dirname, './client/public', 'index.html'));
-// });
-// app.use('/', router);
-// }
 app.use(express.static(path.join(__dirname, 'client', 'build')))
 
 const port = process.env.PORT || 4000;
