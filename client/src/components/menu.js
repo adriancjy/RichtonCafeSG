@@ -6,6 +6,7 @@ import Accordion from 'react-bootstrap/Accordion';
 import { Alert } from 'reactstrap';
 import Card from 'react-bootstrap/Card';
 import { Spinner } from "react-bootstrap";
+// import { useHistory } from "react-router-dom";
 
 const divStyle = {
     overflowY: 'auto',
@@ -173,6 +174,7 @@ export default class MenuList extends Component {
     onSubmit() {
         localStorage.setItem("currentOrders", JSON.stringify(this.state.selectedItems));
         window.location.reload(false);
+        // this.props.history.push(`\menu`);
     }
 
     onCalculate(){
