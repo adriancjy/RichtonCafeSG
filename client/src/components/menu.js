@@ -174,7 +174,7 @@ export default class MenuList extends Component {
     onSubmit() {
         localStorage.setItem("currentOrders", JSON.stringify(this.state.selectedItems));
         window.location.reload(false);
-        // this.props.history.push(`\menu`);
+        // this.props.history.replace('/menu');
     }
 
     onCalculate(){
