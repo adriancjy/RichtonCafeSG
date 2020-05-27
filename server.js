@@ -96,11 +96,9 @@ apiRoute.route('/richton/getSideDish').get(function(req, res) {
 });
 
 
-if(process.env.NODE_ENV === 'production'){
-    //set static folder
-    app.use(express.static('build'));
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static( 'client/build' ));
 }
-
 
 const port = process.env.PORT || 4000;
 app.use('/api', apiRoute);
