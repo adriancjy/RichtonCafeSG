@@ -16,9 +16,6 @@ const alertStyle = {
     display: 'none'
 };
 
-
-
-
 const Menu = props => (
     <tr>
         <td>{props.menu.menu_item_name}</td>
@@ -59,6 +56,7 @@ export default class MenuList extends Component {
             selectedItems: [],
             selectedSideDish: [],
             mainChecked: false,
+            nothingSelected: true
         };
         this.onClickCheckbox = this.onClickCheckbox.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -71,6 +69,16 @@ export default class MenuList extends Component {
     };
 
 
+
+    componentWillMount(){
+        var storage = JSON.parse(localStorage.getItem("currentOrders"));
+        if(storage == null){
+            console.log(null);
+        } else{
+            console.log(storage);
+            this.setState({selectedItems: storage});
+        }
+    }
 
     componentDidMount() {
         //main dish
@@ -123,13 +131,17 @@ export default class MenuList extends Component {
 
     //Main
     onClickCheckbox(id, foodName, foodPrice) {
+        const nothingSelectedValue = this.state.nothingSelected;
+        if(nothingSelectedValue){
+            document.getElementById("totalAlert").style["display"] = "none";
+        }
         const checked = this.state.mainChecked;
         if(!checked){
-            this.setState({ selectedItems: [...this.state.selectedItems, {label: foodName, price: foodPrice}], mainChecked: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {mainId: id, label: foodName, price: foodPrice}], mainChecked: true});
             document.getElementById("alertBox").style["display"] = "none";
         }else{
             const item = this.state.selectedItems;
-            if(item[0][0] === foodName){
+            if(item[0].label === foodName){
                 this.setState({selectedItems: [], mainChecked: false});
             }else{
                 var x = document.getElementById(id);
@@ -144,12 +156,12 @@ export default class MenuList extends Component {
     onClickSideDishCheckbox(id, foodName, foodPrice) {
         const selectedSide = this.state.selectedSideDish;
         if(selectedSide.length == 0){
-            this.setState({ selectedItems: [...this.state.selectedItems, {label: foodName, price: foodPrice}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {sideId: id, label: foodName, price: foodPrice}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
         }else{
             if(selectedSide.indexOf(foodName) > -1){
                 this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item !== foodName), selectedItems: this.state.selectedItems.filter(item => item.label !== foodName)});
             }else{
-                this.setState({ selectedItems: [...this.state.selectedItems, {label: foodName, price: foodPrice}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
+                this.setState({ selectedItems: [...this.state.selectedItems, {sideId: id, label: foodName, price: foodPrice}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
             }
         }
     }
@@ -159,7 +171,24 @@ export default class MenuList extends Component {
     }
 
     onSubmit() {
-        console.log(this.state.selectedItems, this.state.selectedSideDish);
+        localStorage.setItem("currentOrders", JSON.stringify(this.state.selectedItems));
+        window.location.reload(false);
+    }
+
+    onCalculate(){
+        localStorage.clear();
+        var totalItems = this.state.selectedItems;
+        if(totalItems.length == 0){
+            document.getElementById("totalAlert").style["display"] = "block";
+        }else{
+            var totalPrice = 0;
+            for(var i = 0; i < totalItems.length; i++){
+                totalPrice += Number(totalItems[i].price, 10);
+            }
+            console.log(totalPrice.toFixed(2));
+            console.log(totalItems);
+        }
+        
     }
 
 
@@ -169,7 +198,11 @@ export default class MenuList extends Component {
             <div>
                 {this.state.retrieved ? (<div>
                 <h3 onClick={() => { this.revealTable() }}>Menu List</h3>
-
+                <a id="totalAlert" style={alertStyle}>
+                                    <Alert  display={this.state.alertHidden} color="danger">
+                                        You did not choose any item!
+                                    </Alert >
+                                    </a>
                 <Accordion defaultActiveKey="0">
                     <Card>
                         <Accordion.Toggle as={Card.Header} eventKey="0">
@@ -222,9 +255,32 @@ export default class MenuList extends Component {
                                 </div></Card.Body>
                         </Accordion.Collapse>
                     </Card>
+                    <Card>
+                        <Accordion.Toggle as={Card.Header} eventKey="2">
+                            Additional Options
+                                    </Accordion.Toggle>
+                        <Accordion.Collapse eventKey="2">
+                            <Card.Body><div style={divStyle}>
+                                    <table className="table table-striped" >
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Price</th>
+                                                <th>Availability</th>
+                                                <th>Select</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            { this.sideDishItemList() } 
+                                        </tbody>
+                                    </table>
+                                </div></Card.Body>
+                        </Accordion.Collapse>
+                    </Card>
                 </Accordion>
                 <div className="form-group">
-                        <input type="submit" onClick={() => {this.onSubmit()}}value="Add new order" className="btn btn-primary" />
+                <input type="submit" onClick={() => {this.onSubmit()}}value="I want to add new order!" className="btn btn-warning" />
+                <input type="submit" onClick={() => {this.onCalculate()}}value="I have finished my ordering!" className="btn btn-success" />
                 </div>
                
             </div>):(<div class="row h-100 page-container">
