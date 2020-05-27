@@ -6,7 +6,6 @@ import Accordion from 'react-bootstrap/Accordion';
 import { Alert } from 'reactstrap';
 import Card from 'react-bootstrap/Card';
 import { Spinner } from "react-bootstrap";
-// import { useHistory } from "react-router-dom";
 
 const divStyle = {
     overflowY: 'auto',
@@ -42,7 +41,7 @@ const SideDish = props => (
 )
 
 export default class MenuList extends Component {
-
+    
     constructor(props) {
         super(props);
         window.menuComponent = this;
@@ -138,7 +137,7 @@ export default class MenuList extends Component {
         }
         const checked = this.state.mainChecked;
         if(!checked){
-            this.setState({ selectedItems: [...this.state.selectedItems, {mainId: id, label: foodName, price: foodPrice}], mainChecked: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {MainId: id, label: foodName, price: foodPrice, type: "main"}], mainChecked: true});
             document.getElementById("alertBox").style["display"] = "none";
         }else{
             const item = this.state.selectedItems;
@@ -157,12 +156,12 @@ export default class MenuList extends Component {
     onClickSideDishCheckbox(id, foodName, foodPrice) {
         const selectedSide = this.state.selectedSideDish;
         if(selectedSide.length == 0){
-            this.setState({ selectedItems: [...this.state.selectedItems, {sideId: id, label: foodName, price: foodPrice}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, label: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
         }else{
             if(selectedSide.indexOf(foodName) > -1){
                 this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item !== foodName), selectedItems: this.state.selectedItems.filter(item => item.label !== foodName)});
             }else{
-                this.setState({ selectedItems: [...this.state.selectedItems, {sideId: id, label: foodName, price: foodPrice}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
+                this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, label: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
             }
         }
     }
@@ -173,8 +172,16 @@ export default class MenuList extends Component {
 
     onSubmit() {
         localStorage.setItem("currentOrders", JSON.stringify(this.state.selectedItems));
+        // var totalItems = this.state.selectedItems;
+        // if(totalItems.length == 0){
+        //     document.getElementById("totalAlert").style["display"] = "block";
+        // }else{
+        //     for(var i = 0; i < totalItems.length; i++){
+        //         document.getElementById(totalItems[i].Id).checked = false;
+        //     }
+        // }
+        // this.props.history.push('/menu');
         window.location.reload(false);
-        // this.props.history.replace('/menu');
     }
 
     onCalculate(){
