@@ -75,7 +75,6 @@ export default class MenuList extends Component {
         if(storage == null){
             console.log(null);
         } else{
-            console.log(storage);
             this.setState({selectedItems: storage});
         }
     }
