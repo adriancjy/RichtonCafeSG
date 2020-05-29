@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 // import { Link } from 'react-router-dom';
 import axios from 'axios';
 import _ from "lodash";
@@ -6,8 +6,12 @@ import Accordion from 'react-bootstrap/Accordion';
 import { Alert } from 'reactstrap';
 import Card from 'react-bootstrap/Card';
 import { Spinner } from "react-bootstrap";
+import { Container, Button, Link } from 'react-floating-action-button';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
+import { FiShoppingCart } from 'react-icons/fi/';
+import SlidingPane from 'react-sliding-pane';
+import 'react-sliding-pane/dist/react-sliding-pane.css';
 
 const divStyle = {
     overflowY: 'auto',
@@ -17,6 +21,15 @@ const divStyle = {
 const alertStyle = {
     display: 'none'
 };
+
+const floatingActionStyleF ={
+    display: 'none'
+}
+
+const floatingActionStyleT ={
+    display: 'block'
+}
+
 
 const Menu = props => (
     <tr>
@@ -42,6 +55,13 @@ const SideDish = props => (
     </tr>
 )
 
+
+const Test = props => (
+    <div>
+        <p>{props.selectedorder.label}</p>
+    </div>
+)
+  
 export default class MenuList extends Component {
     
     constructor(props) {
@@ -58,7 +78,10 @@ export default class MenuList extends Component {
             selectedItems: [],
             selectedSideDish: [],
             mainChecked: false,
-            nothingSelected: true
+            nothingSelected: true,
+            numOfOrders: 0,
+            iteminCart: false,
+            isPaneOpen: false
         };
         this.onClickCheckbox = this.onClickCheckbox.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -74,10 +97,11 @@ export default class MenuList extends Component {
 
     componentWillMount(){
         var storage = JSON.parse(localStorage.getItem("currentOrders"));
+        var cartItem = localStorage.getItem("iteminCart");
         if(storage == null){
             console.log(null);
         } else{
-            this.setState({selectedItems: storage});
+            this.setState({selectedItems: storage, iteminCart: cartItem});
         }
     }
 
@@ -100,7 +124,7 @@ export default class MenuList extends Component {
             .catch(function (error) {
                 console.log(error);
             })
-    }
+        }
 
     //Main dish
     menuItemList() {
@@ -113,6 +137,13 @@ export default class MenuList extends Component {
     sideDishItemList() {
         return this.state.sideDishList.map(function (currentTodo, i) {
             return <SideDish sidedish={currentTodo} key={i} />;
+        })
+    }
+
+    //Cart
+    selectedOrderReturnList(){
+        return this.state.selectedItems.map(function (selectedOrders, i) {
+            return <Test selectedorder={selectedOrders} key={i}/>;
         })
     }
 
@@ -143,7 +174,7 @@ export default class MenuList extends Component {
         }else{
             const item = this.state.selectedItems;
             if(item[0].label === foodName){
-                this.setState({selectedItems: [], mainChecked: false});
+                this.setState({selectedItems: [], mainChecked: false, iteminCart: false});
             }else{
                 var x = document.getElementById(id);
                 x.checked = false;
@@ -190,6 +221,7 @@ export default class MenuList extends Component {
 
     saveStorage(){
         localStorage.setItem("currentOrders", JSON.stringify(this.state.selectedItems));
+        localStorage.setItem("iteminCart", true);
         window.location.reload(false);
     }
 
@@ -317,6 +349,36 @@ export default class MenuList extends Component {
                 <input type="submit" onClick={() => {this.onSubmit()}}value="I want to add new order!" className="btn btn-warning" />
                 <input type="submit" onClick={() => {this.onFinishOrder()}}value="I have finished my ordering!" className="btn btn-success" />
                 </div>
+                {this.state.iteminCart ? (<div id="floatingActionStyle" style={floatingActionStyleT}>
+                <Container>
+                <Button
+                rotate={true}
+                onClick={() => this.setState({ isPaneOpen: true })}><FiShoppingCart/></Button>
+                </Container>
+                </div>):(<div id="floatingActionStyle" style={floatingActionStyleF}>
+                <Container>
+                <Button
+                rotate={true}
+                onClick={() => this.setState({ isPaneOpen: true })}><FiShoppingCart/></Button>
+                </Container>
+                </div>)}
+
+                <SlidingPane
+                width= '50%'
+                className='some-custom-class'
+                overlayClassName='some-custom-overlay-class'
+                isOpen={ this.state.isPaneOpen }
+                title='Your order cart'
+                onRequestClose={ () => {
+                    // triggered on "<" on left top click or on outside click
+                    this.setState({ isPaneOpen: false });
+                } }>
+                <div>
+                    {this.selectedOrderReturnList()}
+                </div>
+                <br />
+                
+                </SlidingPane>
                
             </div>):(<div class="row h-100 page-container">
             <div class="col-sm-12 my-auto">
