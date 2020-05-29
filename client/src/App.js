@@ -26,12 +26,12 @@ function App() {
             <Link to="/" className="navbar-brand">Richton Cafe Ordering Website</Link>
             <div className="collpase navbar-collapse">
               <ul className="navbar-nav mr-auto">
-                <li className="navbar-item">
+                {/* <li className="navbar-item">
                   <Link to="/" className="nav-link">Todos</Link>
                 </li>
                 <li className="navbar-item">
                   <Link to="/create" className="nav-link">Create Todo</Link>
-                </li>
+                </li> */}
                 {/* hidden */}
                 <li className="navbar-item">
                   <Link to="/menu" className="nav-link">Menu</Link>
@@ -40,7 +40,7 @@ function App() {
             </div>
           </nav>
           <br/>
-          <Route path="/" exact component={TodosList} />
+          <Route path="/" exact component={MenuList} />
           <Route path="/edit/:id" component={EditTodo} />
           <Route path="/create" component={CreateTodo} />
           <Route path="/menu" component={MenuList} />
