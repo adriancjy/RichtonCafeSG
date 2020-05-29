@@ -6,6 +6,8 @@ import Accordion from 'react-bootstrap/Accordion';
 import { Alert } from 'reactstrap';
 import Card from 'react-bootstrap/Card';
 import { Spinner } from "react-bootstrap";
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 const divStyle = {
     overflowY: 'auto',
@@ -170,8 +172,42 @@ export default class MenuList extends Component {
     }
 
     onSubmit() {
+        confirmAlert({
+            title: 'Are you done with your current order?',
+            message: 'Click yes to move to next order, no if you wish to change your current order.',
+            buttons: [
+              {
+                label: 'Yes',
+                onClick: () => this.saveStorage()
+              },
+              {
+                label: 'No'
+                
+              }
+            ]
+          });
+    }
+
+    saveStorage(){
         localStorage.setItem("currentOrders", JSON.stringify(this.state.selectedItems));
         window.location.reload(false);
+    }
+
+    onFinishOrder(){
+        confirmAlert({
+            title: 'Finished ordering?',
+            message: 'Click yes to view summary of order, no to continue order!',
+            buttons: [
+              {
+                label: 'Yes',
+                onClick: () => this.onCalculate()
+              },
+              {
+                label: 'No'
+                
+              }
+            ]
+          });
     }
 
     onCalculate(){
@@ -279,7 +315,7 @@ export default class MenuList extends Component {
                 </Accordion>
                 <div className="form-group">
                 <input type="submit" onClick={() => {this.onSubmit()}}value="I want to add new order!" className="btn btn-warning" />
-                <input type="submit" onClick={() => {this.onCalculate()}}value="I have finished my ordering!" className="btn btn-success" />
+                <input type="submit" onClick={() => {this.onFinishOrder()}}value="I have finished my ordering!" className="btn btn-success" />
                 </div>
                
             </div>):(<div class="row h-100 page-container">
