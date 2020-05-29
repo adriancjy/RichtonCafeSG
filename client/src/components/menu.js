@@ -169,7 +169,7 @@ export default class MenuList extends Component {
         }
         const checked = this.state.mainChecked;
         if(!checked){
-            this.setState({ selectedItems: [...this.state.selectedItems, {MainId: id, label: foodName, price: foodPrice, type: "main"}], mainChecked: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {MainId: id, label: foodName, price: foodPrice, type: "main"}], mainChecked: true, iteminCart: true});
             document.getElementById("alertBox").style["display"] = "none";
         }else{
             const item = this.state.selectedItems;
@@ -188,12 +188,13 @@ export default class MenuList extends Component {
     onClickSideDishCheckbox(id, foodName, foodPrice) {
         const selectedSide = this.state.selectedSideDish;
         if(selectedSide.length == 0){
-            this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, label: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, label: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
         }else{
             if(selectedSide.indexOf(foodName) > -1){
+                //Add in a selectedItem while checking it is only the side.
                 this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item !== foodName), selectedItems: this.state.selectedItems.filter(item => item.label !== foodName)});
             }else{
-                this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, label: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true});
+                this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, label: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
             }
         }
     }
@@ -221,7 +222,7 @@ export default class MenuList extends Component {
 
     saveStorage(){
         localStorage.setItem("currentOrders", JSON.stringify(this.state.selectedItems));
-        localStorage.setItem("iteminCart", true);
+        localStorage.setItem("iteminCart", this.state.iteminCart);
         window.location.reload(false);
     }
 
