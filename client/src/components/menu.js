@@ -56,9 +56,11 @@ const SideDish = props => (
 )
 
 
-const Test = props => (
+const Test = props => ( 
     <div>
-        <p>{props.selectedorder.label}</p>
+        {props.selectedorder.type == "main" && <h3>------------------------------</h3>}
+        <p>{props.selectedorder.mlabel}</p>
+        <p>{props.selectedorder.slabel}</p>
     </div>
 )
   
@@ -73,15 +75,17 @@ export default class MenuList extends Component {
             edit: true,
             checkboxMenuItems: [],
             sideDishCheckBox: [],
+            currentSelection: [],
             tableHidden: "none",
             retrieved: false,
             selectedItems: [],
             selectedSideDish: [],
             mainChecked: false,
             nothingSelected: true,
-            numOfOrders: 0,
+            numOfOrders: 1,
             iteminCart: false,
-            isPaneOpen: false
+            isPaneOpen: false,
+            checkOnce: false
         };
         this.onClickCheckbox = this.onClickCheckbox.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -98,10 +102,11 @@ export default class MenuList extends Component {
     componentWillMount(){
         var storage = JSON.parse(localStorage.getItem("currentOrders"));
         var cartItem = localStorage.getItem("iteminCart");
+        var numOrders = localStorage.getItem("numOfOrders");
         if(storage == null){
             console.log(null);
         } else{
-            this.setState({selectedItems: storage, iteminCart: cartItem});
+            this.setState({selectedItems: storage, iteminCart: cartItem, numOfOrders: numOrders});
         }
     }
 
@@ -169,12 +174,12 @@ export default class MenuList extends Component {
         }
         const checked = this.state.mainChecked;
         if(!checked){
-            this.setState({ selectedItems: [...this.state.selectedItems, {MainId: id, label: foodName, price: foodPrice, type: "main"}], mainChecked: true, iteminCart: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {MainId: id, mlabel: foodName, price: foodPrice, type: "main"}], currentSelection: [...this.state.currentSelection, {MainId: id, mlabel: foodName, price: foodPrice, type: "main"}], mainChecked: true, iteminCart: true});
             document.getElementById("alertBox").style["display"] = "none";
         }else{
             const item = this.state.selectedItems;
             if(item[0].label === foodName){
-                this.setState({selectedItems: [], mainChecked: false, iteminCart: false});
+                this.setState({selectedItems: [], currentSelection: [], mainChecked: false, iteminCart: false});
             }else{
                 var x = document.getElementById(id);
                 x.checked = false;
@@ -187,14 +192,21 @@ export default class MenuList extends Component {
     //side
     onClickSideDishCheckbox(id, foodName, foodPrice) {
         const selectedSide = this.state.selectedSideDish;
+        const mainSelected = this.state.currentSelection;
+        var checker = this.state.checkOnce;
+        
+        if(mainSelected.length == 0 && !checker){
+            var pushEmpty = this.state.selectedItems.push({MainId: 0, label: "No main selected", type: "main"})
+            this.setState({ selectedItems: pushEmpty, checkOnce: true});            
+            console.log(this.state.selectedItems);
+        }
         if(selectedSide.length == 0){
-            this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, label: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
         }else{
             if(selectedSide.indexOf(foodName) > -1){
-                //Add in a selectedItem while checking it is only the side.
                 this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item !== foodName), selectedItems: this.state.selectedItems.filter(item => item.label !== foodName)});
             }else{
-                this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, label: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
+                this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
             }
         }
     }
@@ -375,6 +387,7 @@ export default class MenuList extends Component {
                     this.setState({ isPaneOpen: false });
                 } }>
                 <div>
+                    
                     {this.selectedOrderReturnList()}
                 </div>
                 <br />
