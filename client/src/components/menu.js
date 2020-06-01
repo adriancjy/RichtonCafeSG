@@ -191,9 +191,11 @@ export default class MenuList extends Component {
     }
 
     uncheckSideDish(){
-        var sideDish = this.state.selectedSideDish;
+        var sideDish = this.state.selectedItems;
         for(var i = 0; i < sideDish.length; i++){
-            document.getElementById(sideDish[i].sid).checked = false;
+            if(sideDish[i].type == "side"){
+                document.getElementById(sideDish[i].SideId).checked = false;
+            }
         }
     }
 
@@ -208,16 +210,13 @@ export default class MenuList extends Component {
             this.setState({ selectedItems: pushEmpty, checkOnce: true});            
         }
         if(selectedSide.length == 0){
-            this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, {sid: id, label: foodName}], mainChecked: true, iteminCart: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
         }else{
-            for(var i = 0; i < selectedSide.length; i++){
-                if(selectedSide[i].label.indexOf(foodName) > -1){
-                    this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item.label !== foodName), selectedItems: this.state.selectedItems.filter(item => item.slabel !== foodName)});
-                }else{
-                    this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, {sid: id, label: foodName}], mainChecked: true, iteminCart: true});
-                }
-            }
-            
+            if(selectedSide.indexOf(foodName) > -1){
+                this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item.label !== foodName), selectedItems: this.state.selectedItems.filter(item => item.slabel !== foodName)});
+            }else{
+                this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
+            }    
         }
     }
 
