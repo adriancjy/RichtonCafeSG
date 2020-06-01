@@ -179,7 +179,7 @@ export default class MenuList extends Component {
         }else{
             const item = this.state.selectedItems;
             if(item[0].mlabel === foodName){
-                this.setState({selectedItems: [], currentSelection: [], mainChecked: false, iteminCart: false});
+                this.setState({selectedItems: [], currentSelection: [], selectedSideDish: [], mainChecked: false, iteminCart: false});
                 this.uncheckSideDish();
             }else{
                 var x = document.getElementById(id);
@@ -213,7 +213,7 @@ export default class MenuList extends Component {
             this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
         }else{
             if(selectedSide.indexOf(foodName) > -1){
-                this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item.label !== foodName), selectedItems: this.state.selectedItems.filter(item => item.slabel !== foodName)});
+                this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item !== foodName), selectedItems: this.state.selectedItems.filter(item => item.slabel !== foodName)});
             }else{
                 this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
             }    
