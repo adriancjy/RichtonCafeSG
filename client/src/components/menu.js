@@ -178,14 +178,22 @@ export default class MenuList extends Component {
             document.getElementById("alertBox").style["display"] = "none";
         }else{
             const item = this.state.selectedItems;
-            if(item[0].label === foodName){
+            if(item[0].mlabel === foodName){
                 this.setState({selectedItems: [], currentSelection: [], mainChecked: false, iteminCart: false});
+                this.uncheckSideDish();
             }else{
                 var x = document.getElementById(id);
                 x.checked = false;
                 document.getElementById("alertBox").style["display"] = "block";
             }
             
+        }
+    }
+
+    uncheckSideDish(){
+        var sideDish = this.state.selectedSideDish;
+        for(var i = 0; i < sideDish.length; i++){
+            document.getElementById(sideDish[i].sid).checked = false;
         }
     }
 
@@ -196,18 +204,20 @@ export default class MenuList extends Component {
         var checker = this.state.checkOnce;
         
         if(mainSelected.length == 0 && !checker){
-            var pushEmpty = this.state.selectedItems.push({MainId: 0, label: "No main selected", type: "main"})
+            var pushEmpty = this.state.selectedItems.push({MainId: 0, label: "No main selected", price: 0, type: "main"})
             this.setState({ selectedItems: pushEmpty, checkOnce: true});            
-            console.log(this.state.selectedItems);
         }
         if(selectedSide.length == 0){
-            this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, {sid: id, label: foodName}], mainChecked: true, iteminCart: true});
         }else{
-            if(selectedSide.indexOf(foodName) > -1){
-                this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item !== foodName), selectedItems: this.state.selectedItems.filter(item => item.label !== foodName)});
-            }else{
-                this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
+            for(var i = 0; i < selectedSide.length; i++){
+                if(selectedSide[i].label.indexOf(foodName) > -1){
+                    this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item.label !== foodName), selectedItems: this.state.selectedItems.filter(item => item.slabel !== foodName)});
+                }else{
+                    this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, {sid: id, label: foodName}], mainChecked: true, iteminCart: true});
+                }
             }
+            
         }
     }
 
