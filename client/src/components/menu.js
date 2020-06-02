@@ -30,6 +30,9 @@ const floatingActionStyleT ={
     display: 'block'
 }
 
+const cartStyle ={
+    width: 400
+}
 
 const Menu = props => (
     <tr>
@@ -56,13 +59,53 @@ const SideDish = props => (
 )
 
 
-const Test = props => ( 
-    <div>
-        {props.selectedorder.type == "main" && <h3>------------------------------</h3>}
-        <p>{props.selectedorder.mlabel}</p>
-        <p>{props.selectedorder.slabel}</p>
-    </div>
+const MainOrders = props => (
+    <table>
+        {props.selectedorder.type == "main" && <thead>
+            <tr>
+                <th>-------</th>
+            </tr>
+            <tr>
+            <th style={cartStyle}>
+                Order {props.selectedorder.OrderNum}
+            </th>
+            <th>
+                Price
+            </th>
+            </tr>
+        </thead>}
+        <tbody>
+            <tr>
+            <td style={cartStyle}>{props.selectedorder.mlabel}</td>
+            <td>{props.selectedorder.mprice}</td>
+            </tr>
+            <tr>
+            <td style={cartStyle}>{props.selectedorder.slabel}</td>
+            <td>{props.selectedorder.sprice}</td>
+            </tr>
+        </tbody>
+              
+    </table> 
+
 )
+
+const TotalPrice = props => (
+    <table>
+        <thead>
+            <tr>
+                <th style={cartStyle}>
+                    Total price is:
+                </th>
+                <th>
+                    {props.totalPrice}
+                </th>
+            </tr>
+        </thead>
+    </table>
+)
+
+
+
   
 export default class MenuList extends Component {
     
@@ -82,10 +125,12 @@ export default class MenuList extends Component {
             selectedSideDish: [],
             mainChecked: false,
             nothingSelected: true,
-            numOfOrders: 1,
             iteminCart: false,
             isPaneOpen: false,
-            checkOnce: false
+            checkOnce: false,
+            orderCounter: 1,
+            sideChecked: false,
+            totalPriceCal: 0
         };
         this.onClickCheckbox = this.onClickCheckbox.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -104,9 +149,9 @@ export default class MenuList extends Component {
         var cartItem = localStorage.getItem("iteminCart");
         var numOrders = localStorage.getItem("numOfOrders");
         if(storage == null){
-            console.log(null);
         } else{
-            this.setState({selectedItems: storage, iteminCart: cartItem, numOfOrders: numOrders});
+            console.log(numOrders);
+            this.setState({selectedItems: storage, iteminCart: cartItem, orderCounter: numOrders});
         }
     }
 
@@ -129,6 +174,8 @@ export default class MenuList extends Component {
             .catch(function (error) {
                 console.log(error);
             })
+
+            console.log(this.state.selectedItems);
         }
 
     //Main dish
@@ -148,7 +195,7 @@ export default class MenuList extends Component {
     //Cart
     selectedOrderReturnList(){
         return this.state.selectedItems.map(function (selectedOrders, i) {
-            return <Test selectedorder={selectedOrders} key={i}/>;
+            return <MainOrders selectedorder={selectedOrders} key={i}/>;
         })
     }
 
@@ -169,17 +216,19 @@ export default class MenuList extends Component {
     //Main
     onClickCheckbox(id, foodName, foodPrice) {
         const nothingSelectedValue = this.state.nothingSelected;
+        var orderNo = this.state.orderCounter;
+        var priceCalculate = Number(this.state.totalPriceCal,10);
         if(nothingSelectedValue){
             document.getElementById("totalAlert").style["display"] = "none";
         }
         const checked = this.state.mainChecked;
         if(!checked){
-            this.setState({ selectedItems: [...this.state.selectedItems, {MainId: id, mlabel: foodName, price: foodPrice, type: "main"}], currentSelection: [...this.state.currentSelection, {MainId: id, mlabel: foodName, price: foodPrice, type: "main"}], mainChecked: true, iteminCart: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main"}], currentSelection: [...this.state.currentSelection, {MainId: id, mlabel: foodName, price: foodPrice, type: "main"}], mainChecked: true, iteminCart: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
             document.getElementById("alertBox").style["display"] = "none";
         }else{
             const item = this.state.selectedItems;
             if(item[0].mlabel === foodName){
-                this.setState({selectedItems: [], currentSelection: [], selectedSideDish: [], mainChecked: false, iteminCart: false});
+                this.setState({selectedItems: [], currentSelection: [], selectedSideDish: [], mainChecked: false, iteminCart: false, totalPriceCal: 0});
                 this.uncheckSideDish();
             }else{
                 var x = document.getElementById(id);
@@ -203,19 +252,21 @@ export default class MenuList extends Component {
     onClickSideDishCheckbox(id, foodName, foodPrice) {
         const selectedSide = this.state.selectedSideDish;
         const mainSelected = this.state.currentSelection;
+        var priceCalculate = Number(this.state.totalPriceCal,10);
         var checker = this.state.checkOnce;
+        var orderNo = this.state.orderCounter;
         
         if(mainSelected.length == 0 && !checker){
-            var pushEmpty = this.state.selectedItems.push({MainId: 0, label: "No main selected", price: 0, type: "main"})
-            this.setState({ selectedItems: pushEmpty, checkOnce: true});            
+            var pushEmpty = this.state.selectedItems.push({OrderNum: orderNo, MainId: 0, label: "No main selected", mprice: 0, type: "main"})
+            this.setState({ selectedItems: pushEmpty, checkOnce: true, totalPriceCal: priceCalculate + 0});            
         }
         if(selectedSide.length == 0){
-            this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
+            this.setState({ selectedItems: [...this.state.selectedItems, {OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
         }else{
             if(selectedSide.indexOf(foodName) > -1){
                 this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item !== foodName), selectedItems: this.state.selectedItems.filter(item => item.slabel !== foodName)});
             }else{
-                this.setState({ selectedItems: [...this.state.selectedItems, {SideId: id, slabel: foodName, price: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true});
+                this.setState({ selectedItems: [...this.state.selectedItems, {OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
             }    
         }
     }
@@ -241,7 +292,12 @@ export default class MenuList extends Component {
           });
     }
 
+
     saveStorage(){
+        var incrementOrderNo = Number(this.state.orderCounter, 10);
+        incrementOrderNo = incrementOrderNo+1;
+        this.setState({orderCounter: incrementOrderNo});
+        localStorage.setItem("numOfOrders", incrementOrderNo);
         localStorage.setItem("currentOrders", JSON.stringify(this.state.selectedItems));
         localStorage.setItem("iteminCart", this.state.iteminCart);
         window.location.reload(false);
@@ -258,7 +314,6 @@ export default class MenuList extends Component {
               },
               {
                 label: 'No'
-                
               }
             ]
           });
@@ -272,12 +327,39 @@ export default class MenuList extends Component {
         }else{
             var totalPrice = 0;
             for(var i = 0; i < totalItems.length; i++){
-                totalPrice += Number(totalItems[i].price, 10);
+                if(totalItems[i].type == "main"){
+                    totalPrice += Number(totalItems[i].mprice, 10);
+                }else{
+                    totalPrice += Number(totalItems[i].sprice, 10);
+                }
             }
+            var tP = totalPrice.toFixed(2);
             console.log(totalPrice.toFixed(2));
             console.log(totalItems);
+            this.setState({totalPriceCal: tP});
         }
         
+    }
+
+    renderTotalPrice(){
+        var totalCalPrice = 0;
+        const totalOrder = this.state.selectedItems;
+        if(totalOrder.length == 0){
+            return <TotalPrice totalPrice={0}/>
+        }else{
+            for(var i = 0; i < totalOrder.length; i++){
+                if(totalOrder[i].type == "main"){
+                    totalCalPrice += Number(totalOrder[i].mprice, 10);
+                }else{
+                    totalCalPrice += Number(totalOrder[i].sprice, 10);
+                }
+            }
+            return <TotalPrice totalPrice={totalCalPrice.toFixed(2)}/>
+        }
+    }
+
+    OpenPane(){
+        this.setState({isPaneOpen: true});
     }
 
 
@@ -375,13 +457,13 @@ export default class MenuList extends Component {
                 <Container>
                 <Button
                 rotate={true}
-                onClick={() => this.setState({ isPaneOpen: true })}><FiShoppingCart/></Button>
+                onClick={() => this.OpenPane()}><FiShoppingCart/></Button>
                 </Container>
                 </div>):(<div id="floatingActionStyle" style={floatingActionStyleF}>
                 <Container>
                 <Button
                 rotate={true}
-                onClick={() => this.setState({ isPaneOpen: true })}><FiShoppingCart/></Button>
+                onClick={() => this.OpenPane()}><FiShoppingCart/></Button>
                 </Container>
                 </div>)}
 
@@ -396,8 +478,8 @@ export default class MenuList extends Component {
                     this.setState({ isPaneOpen: false });
                 } }>
                 <div>
-                    
                     {this.selectedOrderReturnList()}
+                    {this.renderTotalPrice()}
                 </div>
                 <br />
                 
