@@ -89,6 +89,35 @@ const MainOrders = props => (
 
 )
 
+const CurrentCart = props => (
+    <table>
+        {props.currentselect.type == "main" && <thead>
+            <tr>
+            </tr>
+            <tr>
+            <th style={cartStyle}>
+                Selected items
+            </th>
+            <th>
+                Price
+            </th>
+            </tr>
+        </thead>}
+        <tbody>
+            <tr>
+            <td style={cartStyle}>{props.currentselect.mlabel}</td>
+            <td>{props.currentselect.mprice}</td>
+            </tr>
+            <tr>
+            <td style={cartStyle}>{props.currentselect.slabel}</td>
+            <td>{props.currentselect.sprice}</td>
+            </tr>
+        </tbody>
+              
+    </table> 
+
+)
+
 const TotalPrice = props => (
     <table>
         <thead>
@@ -130,7 +159,9 @@ export default class MenuList extends Component {
             checkOnce: false,
             orderCounter: 1,
             sideChecked: false,
-            totalPriceCal: 0
+            totalPriceCal: 0,
+            currentCart: [],
+            itemAddedToCart: false
         };
         this.onClickCheckbox = this.onClickCheckbox.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -148,10 +179,10 @@ export default class MenuList extends Component {
         var storage = JSON.parse(localStorage.getItem("currentOrders"));
         var cartItem = localStorage.getItem("iteminCart");
         var numOrders = localStorage.getItem("numOfOrders");
+        var itemAddedCart = localStorage.getItem("itemAddedToCart")
         if(storage == null){
         } else{
-            console.log(numOrders);
-            this.setState({selectedItems: storage, iteminCart: cartItem, orderCounter: numOrders});
+            this.setState({selectedItems: storage, iteminCart: cartItem, orderCounter: numOrders, itemAddedToCart: itemAddedCart});
         }
     }
 
@@ -175,7 +206,6 @@ export default class MenuList extends Component {
                 console.log(error);
             })
 
-            console.log(this.state.selectedItems);
         }
 
     //Main dish
@@ -192,10 +222,17 @@ export default class MenuList extends Component {
         })
     }
 
-    //Cart
+    //Added Cart
     selectedOrderReturnList(){
         return this.state.selectedItems.map(function (selectedOrders, i) {
             return <MainOrders selectedorder={selectedOrders} key={i}/>;
+        })
+    }
+
+    //Current selections
+    renderCurrentSelectedCart(){
+        return this.state.currentCart.map(function (currentSelected, i){
+            return <CurrentCart currentselect={currentSelected} key={i}/>
         })
     }
 
@@ -214,21 +251,26 @@ export default class MenuList extends Component {
     }
 
     //Main
+    //Fix the unchecking all become empty
     onClickCheckbox(id, foodName, foodPrice) {
         const nothingSelectedValue = this.state.nothingSelected;
         var orderNo = this.state.orderCounter;
+        var mainO = [{OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main"}];
+        var sideO = this.state.selectedSideDish;
         var priceCalculate = Number(this.state.totalPriceCal,10);
         if(nothingSelectedValue){
             document.getElementById("totalAlert").style["display"] = "none";
         }
         const checked = this.state.mainChecked;
         if(!checked){
-            this.setState({ selectedItems: [...this.state.selectedItems, {OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main"}], currentSelection: [...this.state.currentSelection, {MainId: id, mlabel: foodName, price: foodPrice, type: "main"}], mainChecked: true, iteminCart: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
+            this.setState({currentSelection: [...this.state.currentSelection, {OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main"}], mainChecked: true, iteminCart: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
+            var current = [...mainO,...sideO];
+            this.setState({currentCart: current});
             document.getElementById("alertBox").style["display"] = "none";
         }else{
-            const item = this.state.selectedItems;
-            if(item[0].mlabel === foodName){
-                this.setState({selectedItems: [], currentSelection: [], selectedSideDish: [], mainChecked: false, iteminCart: false, totalPriceCal: 0});
+            const item = this.state.currentSelection;
+            if(item.some(e => e.mlabel === foodName)){
+                this.setState({currentSelection: this.state.currentSelection.filter(item => item.mlabel !== foodName), currentCart: this.state.currentCart.filter(item => item.mlabel !== foodName || item.slabel !== foodName), selectedSideDish: [], mainChecked: false, iteminCart: false, totalPriceCal: 0});
                 this.uncheckSideDish();
             }else{
                 var x = document.getElementById(id);
@@ -240,7 +282,7 @@ export default class MenuList extends Component {
     }
 
     uncheckSideDish(){
-        var sideDish = this.state.selectedItems;
+        var sideDish = this.state.selectedSideDish;
         for(var i = 0; i < sideDish.length; i++){
             if(sideDish[i].type == "side"){
                 document.getElementById(sideDish[i].SideId).checked = false;
@@ -249,6 +291,7 @@ export default class MenuList extends Component {
     }
 
     //side
+    //Fix the async property of setstate, not showing updated current selection.
     onClickSideDishCheckbox(id, foodName, foodPrice) {
         const selectedSide = this.state.selectedSideDish;
         const mainSelected = this.state.currentSelection;
@@ -257,16 +300,22 @@ export default class MenuList extends Component {
         var orderNo = this.state.orderCounter;
         
         if(mainSelected.length == 0 && !checker){
-            var pushEmpty = this.state.selectedItems.push({OrderNum: orderNo, MainId: 0, label: "No main selected", mprice: 0, type: "main"})
-            this.setState({ selectedItems: pushEmpty, checkOnce: true, totalPriceCal: priceCalculate + 0});            
+            var pushEmpty = this.state.selectedSideDish.push({OrderNum: orderNo, MainId: 0, label: "No main selected", mprice: 0, type: "main"})
+            this.setState({ selectedSideDish: pushEmpty, checkOnce: true, totalPriceCal: priceCalculate + 0});            
         }
         if(selectedSide.length == 0){
-            this.setState({ selectedItems: [...this.state.selectedItems, {OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
+            this.setState({ selectedSideDish: [...this.state.selectedSideDish, {OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"}], iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
+            var sideO = selectedSide.concat({OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"});
+            var current = [...mainSelected,...sideO];
+            this.setState({currentCart: current});
         }else{
-            if(selectedSide.indexOf(foodName) > -1){
-                this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item !== foodName), selectedItems: this.state.selectedItems.filter(item => item.slabel !== foodName)});
+            if(selectedSide.some(e => e.slabel === foodName)){
+                this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item.slabel !== foodName), currentCart: this.state.currentCart.filter(item => item.mlabel !== foodName || item.slabel !== foodName),});
             }else{
-                this.setState({ selectedItems: [...this.state.selectedItems, {OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"}], selectedSideDish: [...this.state.selectedSideDish, foodName], mainChecked: true, iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
+                this.setState({ selectedSideDish: [...this.state.selectedSideDish, {OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"}], iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
+                var sideO = selectedSide.concat({OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"});
+                var current = [...mainSelected,...sideO];
+                this.setState({currentCart: current});
             }    
         }
     }
@@ -285,8 +334,7 @@ export default class MenuList extends Component {
                 onClick: () => this.saveStorage()
               },
               {
-                label: 'No'
-                
+                label: 'No'              
               }
             ]
           });
@@ -294,12 +342,16 @@ export default class MenuList extends Component {
 
 
     saveStorage(){
+        var currentSelected = this.state.currentCart;
+        var combined = this.state.selectedItems.concat(currentSelected);
+        this.setState({selectedItems: combined, itemAddedToCart: true});
         var incrementOrderNo = Number(this.state.orderCounter, 10);
         incrementOrderNo = incrementOrderNo+1;
         this.setState({orderCounter: incrementOrderNo});
         localStorage.setItem("numOfOrders", incrementOrderNo);
-        localStorage.setItem("currentOrders", JSON.stringify(this.state.selectedItems));
+        localStorage.setItem("currentOrders", JSON.stringify(combined));
         localStorage.setItem("iteminCart", this.state.iteminCart);
+        localStorage.setItem("itemAddedToCart", this.state.itemAddedToCart);
         window.location.reload(false);
     }
 
@@ -478,9 +530,16 @@ export default class MenuList extends Component {
                     this.setState({ isPaneOpen: false });
                 } }>
                 <div>
-                    {this.selectedOrderReturnList()}
-                    {this.renderTotalPrice()}
+                <h3 class="p-3 mb-2 bg-secondary text-white">Current selection:</h3>
+                    {this.renderCurrentSelectedCart()}
                 </div>
+                <br/>
+                {this.state.itemAddedToCart ? (<div>
+                <h3 class="p-3 mb-2 bg-dark text-white">Orders added to cart:</h3>
+                    {this.selectedOrderReturnList()}
+                    <br/>
+                    {this.renderTotalPrice()}
+                </div>):(<div></div>)}
                 <br />
                 
                 </SlidingPane>
