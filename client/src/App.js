@@ -8,6 +8,7 @@ import CreateTodo from "./components/create-todo.component";
 import EditTodo from "./components/edit-todo.component";
 import TodosList from "./components/todo-list.component";
 import MenuList from "./components/menu";
+import Payment from "./components/payment";
 
 //react-bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -44,6 +45,7 @@ function App() {
           <Route path="/edit/:id" component={EditTodo} />
           <Route path="/create" component={CreateTodo} />
           <Route path="/menu" component={MenuList} />
+          <Route path="/payment" component={Payment}/>
         </div>
         </div>
       </Router>

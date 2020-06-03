@@ -1,5 +1,5 @@
 import React, { Component, useState } from 'react';
-// import { Link } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import axios from 'axios';
 import _ from "lodash";
 import Accordion from 'react-bootstrap/Accordion';
@@ -327,14 +327,14 @@ export default class MenuList extends Component {
     onSubmit() {
         confirmAlert({
             title: 'Are you done with your current order?',
-            message: 'Click yes to move to next order, no if you wish to change your current order.',
+            message: 'Click Yes to move to next order or No if you wish to change your current order!',
             buttons: [
               {
                 label: 'Yes',
                 onClick: () => this.saveStorage()
               },
               {
-                label: 'No'              
+                label: "No"
               }
             ]
           });
@@ -373,22 +373,26 @@ export default class MenuList extends Component {
 
     onCalculate(){
         localStorage.clear();
+        var currentItems = this.state.currentCart;
         var totalItems = this.state.selectedItems;
-        if(totalItems.length == 0){
+        var combined = totalItems.concat(currentItems);
+        if(combined.length == 0){
             document.getElementById("totalAlert").style["display"] = "block";
         }else{
             var totalPrice = 0;
-            for(var i = 0; i < totalItems.length; i++){
-                if(totalItems[i].type == "main"){
-                    totalPrice += Number(totalItems[i].mprice, 10);
+            for(var i = 0; i < combined.length; i++){
+                if(combined[i].type == "main"){
+                    totalPrice += Number(combined[i].mprice, 10);
                 }else{
-                    totalPrice += Number(totalItems[i].sprice, 10);
+                    totalPrice += Number(combined[i].sprice, 10);
                 }
             }
             var tP = totalPrice.toFixed(2);
-            console.log(totalPrice.toFixed(2));
-            console.log(totalItems);
             this.setState({totalPriceCal: tP});
+            this.props.history.push({
+                pathname: '/payment',
+                state: {totalPrice: tP, selectedItems: combined}
+              })
         }
         
     }
@@ -502,8 +506,8 @@ export default class MenuList extends Component {
                     </Card>
                 </Accordion>
                 <div className="form-group">
-                <input type="submit" onClick={() => {this.onSubmit()}}value="I want to add new order!" className="btn btn-warning" />
-                <input type="submit" onClick={() => {this.onFinishOrder()}}value="I have finished my ordering!" className="btn btn-success" />
+                <input type="submit" onClick={() => {this.onSubmit()}}value="Continue ordering!" className="btn btn-warning" />
+                <input type="submit" onClick={() => {this.onFinishOrder()}}value="Checkout order!" className="btn btn-success" />
                 </div>
                 {this.state.iteminCart ? (<div id="floatingActionStyle" style={floatingActionStyleT}>
                 <Container>
