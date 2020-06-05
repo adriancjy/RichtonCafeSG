@@ -8,6 +8,7 @@ const apiRoute = express.Router();
 let Todo = require('./model/todo.model');
 let Menu = require('./model/menu.model');
 let SideDish = require('./model/sidedish.model');
+let Order = require('./model/order.model');
 app.use(cors());
 
 app.use(bodyParser.json());
@@ -21,17 +22,6 @@ connection.once('open', function() {
     console.log("MongoDB database connection established successfully");
 });
 
-
-//todo API route -- to be deleted.
-apiRoute.route('/todo/getAlldata').get(function(req, res) {
-    Todo.find(function(err, todo) {
-        if (err) {
-            console.log(err);
-        } else {
-            res.json(todo);
-        }
-    });
-});
 
 apiRoute.route('/todo/:id').get(function(req, res) {
     let id = req.params.id;
@@ -56,17 +46,6 @@ apiRoute.route('/todo/update/:id').post(function(req, res) {
                 res.status(400).send("Update not possible");
             });
     });
-});
-
-apiRoute.route('/todo/add').post(function(req, res) {
-    let todo = new Todo(req.body);
-    todo.save()
-        .then(todo => {
-            res.status(200).json({'todo': 'todo added successfully'});
-        })
-        .catch(err => {
-            res.status(400).send('adding new todo failed');
-        });
 });
 
 
@@ -94,6 +73,21 @@ apiRoute.route('/richton/getSideDish').get(function(req, res) {
         }
     });
 });
+
+//Insert order into db
+
+apiRoute.route('/richton/saveOrder').post(function(req, res) {
+    let order = Order(req.body);
+    console.log(req.body[0]);
+    Order.insertMany(req.body)
+        .then(order => {
+            res.status(200).json({'order': 1});
+        })
+        .catch(err => {
+            res.status(400).send(0);
+        });
+});
+
 
 app.use(express.static(path.join(__dirname, 'client', 'build')))
 

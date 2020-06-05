@@ -359,7 +359,6 @@ export default class MenuList extends Component {
           });
     }
 
-
     saveStorage(){
         var currentSelected = this.state.currentCart;
         var combined = this.state.selectedItems.concat(currentSelected);
@@ -410,12 +409,27 @@ export default class MenuList extends Component {
             }
             var tP = totalPrice.toFixed(2);
             this.setState({totalPriceCal: tP});
+
+            //replace key with phone number!
+            var objTest = {key: "93228016", combined};
+            axios.post('/api/richton/saveOrder', objTest)
+        .then(res => this.reportError(res.data));
+
             this.props.history.push({
                 pathname: '/payment',
                 state: {totalPrice: tP, selectedItems: combined}
               })
         }
         
+    }
+
+    reportError(value){
+        if(value.order == 1){
+            console.log("success");
+        }else{
+            //Maybe do confirm alert to tell failure saving.
+            console.log("fail");
+        }
     }
 
     renderTotalPrice(){
