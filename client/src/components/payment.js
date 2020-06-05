@@ -1,30 +1,42 @@
 import React, { Component } from 'react';
 
 const cartStyle ={
-    width: 400
+    width: 200,
+    textAlign: 'left'
+}
+
+const cartStyle2 ={
+    width: 100
 }
 
 const tableBorder ={
     border: 'solid',
-    marginLeft: 150
+    width: 300,
+}
 
+const mainTable ={
+    border: 'solid',
+    margin: '0 auto',
+    width: 300,
 }
 
 const priceBorder ={
-    marginLeft: 150
+    margin: '0 auto'
 }
 
 const OrderSummary = props => (
-    <table style={tableBorder}>
+    <table>
         {props.selectedsummary.type == "main" && <thead>
-            <tr class="p-3 mb-2 bg-dark text-white">
-                <th>
-                    Order Summary
-                </th>
-                <th>
-
-                </th>
+            <tr>
+            <th style={cartStyle}>
+                Order {props.selectedsummary.OrderNum}
+            </th>
+            <th>
+                Price
+            </th>
             </tr>
+        </thead>}
+        {props.selectedsummary.type == "nomain" && <thead>
             <tr>
             <th style={cartStyle}>
                 Order {props.selectedsummary.OrderNum}
@@ -37,14 +49,13 @@ const OrderSummary = props => (
         <tbody>
             <tr>
             <td style={cartStyle}>{props.selectedsummary.mlabel}</td>
-            <td>{props.selectedsummary.mprice}</td>
+            <td style={cartStyle2}>{props.selectedsummary.mprice}</td>
             </tr>
             <tr>
             <td style={cartStyle}>{props.selectedsummary.slabel}</td>
-            <td>{props.selectedsummary.sprice}</td>
+            <td style={cartStyle2}>{props.selectedsummary.sprice}</td>
             </tr>
-        </tbody>
-              
+        </tbody>              
     </table> 
 
 )
@@ -56,7 +67,7 @@ const TotalPrice = props => (
                 <th style={cartStyle}>
                     Total price is:
                 </th>
-                <th>
+                <th style={cartStyle2}>
                     {props.totalPrice}
                 </th>
             </tr>
@@ -95,13 +106,21 @@ export default class Payment extends Component {
     render() {
     return (
     <div
-    style={{
-        position: 'absolute', left: '50%', top: '50%',
-        transform: 'translate(-50%, -50%)'
-    }}>
+    >
         <h3>Your order has been successfully completed. Your order summary is as below:</h3>
         <br/>
+        <table style={mainTable}>
+            <thead>
+            <tr class="p-3 mb-2 bg-dark text-white">
+                <th>
+                    Order Summary
+                </th>
+            </tr>
+        </thead>
+        <tbody>
         {this.renderOrderSummary()}
+        </tbody>
+        </table>
         <br/>
         {this.renderTotalPrice()}   
         <br/>

@@ -74,6 +74,19 @@ const MainOrders = props => (
             </th>
             </tr>
         </thead>}
+        {props.selectedorder.type == "nomain" && <thead>
+            <tr>
+                <th>-------</th>
+            </tr>
+            <tr>
+            <th style={cartStyle}>
+                Order {props.selectedorder.OrderNum}
+            </th>
+            <th>
+                Price
+            </th>
+            </tr>
+        </thead>}
         <tbody>
             <tr>
             <td style={cartStyle}>{props.selectedorder.mlabel}</td>
@@ -257,6 +270,7 @@ export default class MenuList extends Component {
         var orderNo = this.state.orderCounter;
         var mainO = [{OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main"}];
         var sideO = this.state.selectedSideDish;
+        var checkCart = this.state.selectedItems;
         var priceCalculate = Number(this.state.totalPriceCal,10);
         if(nothingSelectedValue){
             document.getElementById("totalAlert").style["display"] = "none";
@@ -270,7 +284,12 @@ export default class MenuList extends Component {
         }else{
             const item = this.state.currentSelection;
             if(item.some(e => e.mlabel === foodName)){
-                this.setState({currentSelection: this.state.currentSelection.filter(item => item.mlabel !== foodName), currentCart: this.state.currentCart.filter(item => item.mlabel !== foodName || item.slabel !== foodName), selectedSideDish: [], mainChecked: false, iteminCart: false, totalPriceCal: 0});
+                this.setState({currentSelection: [], currentCart: [], selectedSideDish: [], mainChecked: false, totalPriceCal: 0});
+                if(checkCart.length > 0){
+                    this.setState({iteminCart: true});
+                }else{
+                    this.setState({iteminCart: false});
+                }
                 this.uncheckSideDish();
             }else{
                 var x = document.getElementById(id);
@@ -300,7 +319,7 @@ export default class MenuList extends Component {
         var orderNo = this.state.orderCounter;
         
         if(mainSelected.length == 0 && !checker){
-            var pushEmpty = this.state.selectedSideDish.push({OrderNum: orderNo, MainId: 0, label: "No main selected", mprice: 0, type: "main"})
+            var pushEmpty = this.state.selectedSideDish.push({OrderNum: orderNo, MainId: 0, label: "No main selected", nmprice: 0, type: "nomain"})
             this.setState({ selectedSideDish: pushEmpty, checkOnce: true, totalPriceCal: priceCalculate + 0});            
         }
         if(selectedSide.length == 0){
@@ -383,8 +402,10 @@ export default class MenuList extends Component {
             for(var i = 0; i < combined.length; i++){
                 if(combined[i].type == "main"){
                     totalPrice += Number(combined[i].mprice, 10);
-                }else{
+                }else if(combined[i].type == "side"){
                     totalPrice += Number(combined[i].sprice, 10);
+                }else if(combined[i].type == "nomain"){
+                    totalPrice += Number(combined[i].nmprice, 10);
                 }
             }
             var tP = totalPrice.toFixed(2);
@@ -406,8 +427,10 @@ export default class MenuList extends Component {
             for(var i = 0; i < totalOrder.length; i++){
                 if(totalOrder[i].type == "main"){
                     totalCalPrice += Number(totalOrder[i].mprice, 10);
-                }else{
+                }else if(totalOrder[i].type == "side"){
                     totalCalPrice += Number(totalOrder[i].sprice, 10);
+                }else if(totalOrder[i].type == "nomain"){
+                    totalCalPrice += Number(totalOrder[i].nmprice, 10);
                 }
             }
             return <TotalPrice totalPrice={totalCalPrice.toFixed(2)}/>
