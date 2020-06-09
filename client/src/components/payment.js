@@ -83,10 +83,10 @@ export default class Payment extends Component {
             selectedItems: [],
             totalPrice: 0
         }
-        this.componentWillMount = this.componentWillMount.bind(this);
+        this.componentDidMount = this.componentDidMount.bind(this);
     }
 
-    componentWillMount(){
+    componentDidMount(){
         var price = this.props.location.state.totalPrice;
         var orders = this.props.location.state.selectedItems;
         this.setState({selectedItems: orders, totalPrice: price});

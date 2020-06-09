@@ -78,7 +78,6 @@ apiRoute.route('/richton/getSideDish').get(function(req, res) {
 
 apiRoute.route('/richton/saveOrder').post(function(req, res) {
     let order = Order(req.body);
-    console.log(req.body[0]);
     Order.insertMany(req.body)
         .then(order => {
             res.status(200).json({'order': 1});

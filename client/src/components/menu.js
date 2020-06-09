@@ -1,5 +1,4 @@
-import React, { Component, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import React, { Component } from 'react';
 import axios from 'axios';
 import _ from "lodash";
 import Accordion from 'react-bootstrap/Accordion';
@@ -97,6 +96,15 @@ const MainOrders = props => (
             <td>{props.selectedorder.sprice}</td>
             </tr>
         </tbody>
+        <tfoot>
+            <tr>
+            {props.selectedorder.completed == 'true' && 
+                <td>
+                    <input type="submit" value="Edit" onClick={() => { window.menuComponent.testFunc(props.selectedorder.OrderNum)}}></input>
+                    <input type="submit" value="Delete" onClick={() => { window.menuComponent.deleteOrder(props.selectedorder.OrderNum)}}></input>
+                </td>}
+            </tr>
+        </tfoot>
               
     </table> 
 
@@ -221,6 +229,24 @@ export default class MenuList extends Component {
 
         }
 
+
+    editOrder(id){
+        
+    }
+
+    deleteOrder(id){
+        var selectedOrder = this.state.selectedItems.filter(item => item.OrderNum !== id);
+        for(var i = 0; i < selectedOrder.length; i++){
+            if(selectedOrder[i].OrderNum > id){
+                selectedOrder[i].OrderNum = selectedOrder[i].OrderNum - 1;
+            }else if(selectedOrder[i].Ordernum == id){
+                selectedOrder[i].OrderNum = selectedOrder[i].OrderNum - 1;
+            }
+        }
+        localStorage.setItem("currentOrders", JSON.stringify(selectedOrder));
+        this.setState({selectedItems: selectedOrder});
+    }
+
     //Main dish
     menuItemList() {
         return this.state.menuList.map(function (currentTodo, i) {
@@ -248,6 +274,7 @@ export default class MenuList extends Component {
             return <CurrentCart currentselect={currentSelected} key={i}/>
         })
     }
+
 
     //Richton Main dish
     mapObjecttoArray() {
@@ -317,23 +344,24 @@ export default class MenuList extends Component {
         var priceCalculate = Number(this.state.totalPriceCal,10);
         var checker = this.state.checkOnce;
         var orderNo = this.state.orderCounter;
+        var sideO, current;
         
         if(mainSelected.length == 0 && !checker){
-            var pushEmpty = this.state.selectedSideDish.push({OrderNum: orderNo, MainId: 0, label: "No main selected", nmprice: 0, type: "nomain"})
+            var pushEmpty = this.state.selectedSideDish.push({OrderNum: orderNo, MainId: 0, label: "No main selected", nmprice: 0, type: "nomain" })
             this.setState({ selectedSideDish: pushEmpty, checkOnce: true, totalPriceCal: priceCalculate + 0});            
         }
         if(selectedSide.length == 0){
             this.setState({ selectedSideDish: [...this.state.selectedSideDish, {OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"}], iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
-            var sideO = selectedSide.concat({OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"});
-            var current = [...mainSelected,...sideO];
+            sideO = selectedSide.concat({OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"});
+            current = [...mainSelected,...sideO];
             this.setState({currentCart: current});
         }else{
             if(selectedSide.some(e => e.slabel === foodName)){
                 this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item.slabel !== foodName), currentCart: this.state.currentCart.filter(item => item.mlabel !== foodName || item.slabel !== foodName),});
             }else{
                 this.setState({ selectedSideDish: [...this.state.selectedSideDish, {OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"}], iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
-                var sideO = selectedSide.concat({OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"});
-                var current = [...mainSelected,...sideO];
+                sideO = selectedSide.concat({OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"});
+                current = [...mainSelected,...sideO];
                 this.setState({currentCart: current});
             }    
         }
@@ -361,6 +389,7 @@ export default class MenuList extends Component {
 
     saveStorage(){
         var currentSelected = this.state.currentCart;
+        currentSelected.push({OrderNum: this.state.orderCounter, completed: 'true'});
         var combined = this.state.selectedItems.concat(currentSelected);
         this.setState({selectedItems: combined, itemAddedToCart: true});
         var incrementOrderNo = Number(this.state.orderCounter, 10);
@@ -372,6 +401,8 @@ export default class MenuList extends Component {
         localStorage.setItem("itemAddedToCart", this.state.itemAddedToCart);
         window.location.reload(false);
     }
+
+
 
     onFinishOrder(){
         confirmAlert({
