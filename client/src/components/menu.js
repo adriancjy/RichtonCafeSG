@@ -243,8 +243,10 @@ export default class MenuList extends Component {
                 selectedOrder[i].OrderNum = selectedOrder[i].OrderNum - 1;
             }
         }
+        var newCount = this.state.orderCounter - 1;
         localStorage.setItem("currentOrders", JSON.stringify(selectedOrder));
-        this.setState({selectedItems: selectedOrder});
+        localStorage.setItem("numOfOrders", newCount);
+        this.setState({selectedItems: selectedOrder, orderCounter: newCount});
     }
 
     //Main dish
