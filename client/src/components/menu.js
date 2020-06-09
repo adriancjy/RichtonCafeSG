@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
+import { Redirect } from 'react-router-dom';
 import axios from 'axios';
 import _ from "lodash";
 import Accordion from 'react-bootstrap/Accordion';
@@ -38,7 +39,7 @@ const Menu = props => (
         <td>{props.menu.menu_item_name}</td>
         <td>{props.menu.menu_item_price}</td>
         <td>{props.menu.menu_item_availability}</td>
-        <td><input type="checkbox" id={props.menu._id} onClick={() => { window.menuComponent.onClickCheckbox(props.menu._id, props.menu.menu_item_name, props.menu.menu_item_price) }} /></td>
+        <td><input type="checkbox" className="checkbox" id={props.menu._id} onClick={() => { window.menuComponent.onClickCheckbox(props.menu._id, props.menu.menu_item_name, props.menu.menu_item_price) }} /></td>
         {/* <td> */}
         {/* <Link to={"/edit/"+props.todo._id}>Edit</Link> */}
         {/* </td> */}
@@ -50,7 +51,7 @@ const SideDish = props => (
         <td>{props.sidedish.menu_item_name}</td>
         <td>{props.sidedish.menu_item_price}</td>
         <td>{props.sidedish.menu_item_availability}</td>
-        <td><input type="checkbox" id={props.sidedish._id} onClick={() => { window.menuComponent.onClickSideDishCheckbox(props.sidedish._id, props.sidedish.menu_item_name, props.sidedish.menu_item_price) }} /></td>
+        <td><input type="checkbox" className="checkbox" id={props.sidedish._id} onClick={() => { window.menuComponent.onClickSideDishCheckbox(props.sidedish._id, props.sidedish.menu_item_name, props.sidedish.menu_item_price) }} /></td>
         {/* <td> */}
         {/* <Link to={"/edit/"+props.todo._id}>Edit</Link> */}
         {/* </td> */}
@@ -101,7 +102,7 @@ const MainOrders = props => (
             {props.selectedorder.completed == 'true' && 
                 <td>
                     <input type="submit" value="Edit" className="btn btn-warning" onClick={() => { window.menuComponent.testFunc(props.selectedorder.OrderNum)}}></input>
-                    <input type="submit" value="Remove" className="btn btn-danger" onClick={() => { window.menuComponent.deleteOrder(props.selectedorder.OrderNum)}}></input>
+                    <input type="submit" value="Delete" className="btn btn-danger" onClick={() => { window.menuComponent.deleteOrder(props.selectedorder.OrderNum)}}></input>
                 </td>}
             </tr>
         </tfoot>
@@ -230,12 +231,13 @@ export default class MenuList extends Component {
         }
 
 
-    editOrder(id){
-        
-    }
+    editOrder(id){}
 
     deleteOrder(id){
+        var newID = Number(this.state.orderCounter, 10) - 1;
+        this.setState({orderCounter: newID});
         var selectedOrder = this.state.selectedItems.filter(item => item.OrderNum !== id);
+        var current = this.state.currentCart;
         for(var i = 0; i < selectedOrder.length; i++){
             if(selectedOrder[i].OrderNum > id){
                 selectedOrder[i].OrderNum = selectedOrder[i].OrderNum - 1;
@@ -243,10 +245,20 @@ export default class MenuList extends Component {
                 selectedOrder[i].OrderNum = selectedOrder[i].OrderNum - 1;
             }
         }
-        var newCount = this.state.orderCounter - 1;
+
+        if(current.length > 0){
+            for(var i = 0; i < current.length; i++){
+                var newOID = current[i].OrderNum - 1;
+                current[i].OrderNum = newOID;
+            }
+        }
+        var allCB = document.getElementsByClassName("checkbox");
+        for(i = 0; i < allCB.length; i++){
+             allCB[i].checked = false;
+        }
         localStorage.setItem("currentOrders", JSON.stringify(selectedOrder));
-        localStorage.setItem("numOfOrders", newCount);
-        this.setState({selectedItems: selectedOrder, orderCounter: newCount});
+        localStorage.setItem("numOfOrders", newID);
+        this.setState({selectedItems: selectedOrder, currentCart: [], currentSelection: [], mainChecked: false});
     }
 
     //Main dish
@@ -296,7 +308,7 @@ export default class MenuList extends Component {
     //Fix the unchecking all become empty
     onClickCheckbox(id, foodName, foodPrice) {
         const nothingSelectedValue = this.state.nothingSelected;
-        var orderNo = this.state.orderCounter;
+        var orderNo = Number(this.state.orderCounter, 10);
         var mainO = [{OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main"}];
         var sideO = this.state.selectedSideDish;
         var checkCart = this.state.selectedItems;
@@ -327,6 +339,7 @@ export default class MenuList extends Component {
             }
             
         }
+
     }
 
     uncheckSideDish(){
@@ -345,8 +358,7 @@ export default class MenuList extends Component {
         const mainSelected = this.state.currentSelection;
         var priceCalculate = Number(this.state.totalPriceCal,10);
         var checker = this.state.checkOnce;
-        var orderNo = this.state.orderCounter;
-        var sideO, current;
+        var orderNo = Number(this.state.orderCounter, 10);
         
         if(mainSelected.length == 0 && !checker){
             var pushEmpty = this.state.selectedSideDish.push({OrderNum: orderNo, MainId: 0, label: "No main selected", nmprice: 0, type: "nomain" })
@@ -354,16 +366,16 @@ export default class MenuList extends Component {
         }
         if(selectedSide.length == 0){
             this.setState({ selectedSideDish: [...this.state.selectedSideDish, {OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"}], iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
-            sideO = selectedSide.concat({OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"});
-            current = [...mainSelected,...sideO];
+            var sideO = selectedSide.concat({OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"});
+            var current = [...mainSelected,...sideO];
             this.setState({currentCart: current});
         }else{
             if(selectedSide.some(e => e.slabel === foodName)){
-                this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item.slabel !== foodName), currentCart: this.state.currentCart.filter(item => item.mlabel !== foodName || item.slabel !== foodName),});
+                this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item.slabel !== foodName), currentCart: this.state.currentCart.filter(item => item.slabel !== foodName),});
             }else{
                 this.setState({ selectedSideDish: [...this.state.selectedSideDish, {OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"}], iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
-                sideO = selectedSide.concat({OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"});
-                current = [...mainSelected,...sideO];
+                var sideO = selectedSide.concat({OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"});
+                var current = [...mainSelected,...sideO];
                 this.setState({currentCart: current});
             }    
         }
@@ -391,7 +403,7 @@ export default class MenuList extends Component {
 
     saveStorage(){
         var currentSelected = this.state.currentCart;
-        currentSelected.push({OrderNum: this.state.orderCounter, completed: 'true'});
+        currentSelected.push({OrderNum: Number(this.state.orderCounter, 10), completed: 'true'});
         var combined = this.state.selectedItems.concat(currentSelected);
         this.setState({selectedItems: combined, itemAddedToCart: true});
         var incrementOrderNo = Number(this.state.orderCounter, 10);
