@@ -238,6 +238,7 @@ export default class MenuList extends Component {
         this.setState({orderCounter: newID});
         var selectedOrder = this.state.selectedItems.filter(item => item.OrderNum !== id);
         var current = this.state.currentCart;
+        var currentSel = this.state.currentSelection;
         for(var i = 0; i < selectedOrder.length; i++){
             if(selectedOrder[i].OrderNum > id){
                 selectedOrder[i].OrderNum = selectedOrder[i].OrderNum - 1;
@@ -252,13 +253,20 @@ export default class MenuList extends Component {
                 current[i].OrderNum = newOID;
             }
         }
-        var allCB = document.getElementsByClassName("checkbox");
-        for(i = 0; i < allCB.length; i++){
-             allCB[i].checked = false;
+
+        if(currentSel.length > 0){
+            for(var i = 0; i < currentSel.length; i++){
+                var newOID = currentSel[i].OrderNum - 1;
+                currentSel[i].OrderNum = newOID;
+            }
         }
+        // var allCB = document.getElementsByClassName("checkbox");
+        // for(i = 0; i < allCB.length; i++){
+        //      allCB[i].checked = false;
+        // }
         localStorage.setItem("currentOrders", JSON.stringify(selectedOrder));
         localStorage.setItem("numOfOrders", newID);
-        this.setState({selectedItems: selectedOrder, currentCart: [], currentSelection: [], mainChecked: false});
+        this.setState({selectedItems: selectedOrder, orderCounter: newID, currentCart: current, currentSelection: currentSel});
     }
 
     //Main dish
@@ -339,7 +347,6 @@ export default class MenuList extends Component {
             }
             
         }
-
     }
 
     uncheckSideDish(){
@@ -359,7 +366,6 @@ export default class MenuList extends Component {
         var priceCalculate = Number(this.state.totalPriceCal,10);
         var checker = this.state.checkOnce;
         var orderNo = Number(this.state.orderCounter, 10);
-        
         if(mainSelected.length == 0 && !checker){
             var pushEmpty = this.state.selectedSideDish.push({OrderNum: orderNo, MainId: 0, label: "No main selected", nmprice: 0, type: "nomain" })
             this.setState({ selectedSideDish: pushEmpty, checkOnce: true, totalPriceCal: priceCalculate + 0});            
