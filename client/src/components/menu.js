@@ -100,8 +100,8 @@ const MainOrders = props => (
             <tr>
             {props.selectedorder.completed == 'true' && 
                 <td>
-                    <input type="submit" value="Edit" onClick={() => { window.menuComponent.testFunc(props.selectedorder.OrderNum)}}></input>
-                    <input type="submit" value="Delete" onClick={() => { window.menuComponent.deleteOrder(props.selectedorder.OrderNum)}}></input>
+                    <input type="submit" value="Edit" className="btn btn-warning" onClick={() => { window.menuComponent.testFunc(props.selectedorder.OrderNum)}}></input>
+                    <input type="submit" value="Remove" className="btn btn-danger" onClick={() => { window.menuComponent.deleteOrder(props.selectedorder.OrderNum)}}></input>
                 </td>}
             </tr>
         </tfoot>
