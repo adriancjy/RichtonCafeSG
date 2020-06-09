@@ -9,7 +9,7 @@ import EditTodo from "./components/edit-todo.component";
 import TodosList from "./components/todo-list.component";
 import MenuList from "./components/menu";
 import Payment from "./components/payment";
-
+import Welcome from "./components/welcome";
 //react-bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -41,7 +41,7 @@ function App() {
             </div>
           </nav>
           <br/>
-          <Route path="/" exact component={MenuList} />
+          <Route path="/" exact component={Welcome} />
           <Route path="/edit/:id" component={EditTodo} />
           <Route path="/create" component={CreateTodo} />
           <Route path="/menu" component={MenuList} />

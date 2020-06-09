@@ -183,7 +183,8 @@ export default class MenuList extends Component {
             sideChecked: false,
             totalPriceCal: 0,
             currentCart: [],
-            itemAddedToCart: false
+            itemAddedToCart: false,
+            phoneNo: ''
         };
         this.onClickCheckbox = this.onClickCheckbox.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -228,6 +229,8 @@ export default class MenuList extends Component {
                 console.log(error);
             })
 
+            var key = this.props.location.state.phoneNo;
+            this.setState({phoneNo: key});
         }
 
 
@@ -443,6 +446,7 @@ export default class MenuList extends Component {
     onCalculate(){
         localStorage.clear();
         var currentItems = this.state.currentCart;
+        currentItems.push({OrderNum: Number(this.state.orderCounter, 10), completed: 'true'});
         var totalItems = this.state.selectedItems;
         var combined = totalItems.concat(currentItems);
         if(combined.length == 0){
@@ -462,7 +466,7 @@ export default class MenuList extends Component {
             this.setState({totalPriceCal: tP});
 
             //replace key with phone number!
-            var objTest = {key: "93228016", combined};
+            var objTest = {key: this.state.phoneNo, combined};
             axios.post('/api/richton/saveOrder', objTest)
         .then(res => this.reportError(res.data));
 
