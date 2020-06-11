@@ -651,7 +651,7 @@ export default class MenuList extends Component {
                                 </div></Card.Body>
                         </Accordion.Collapse>
                     </Card>
-                    <Card>
+                    {/* <Card>
                         <Accordion.Toggle as={Card.Header} eventKey="2">
                             Additional Options
                                     </Accordion.Toggle>
@@ -672,7 +672,7 @@ export default class MenuList extends Component {
                                     </table>
                                 </div></Card.Body>
                         </Accordion.Collapse>
-                    </Card>
+                    </Card> */}
                 </Accordion>
                 <div className="form-group">
                 <input type="submit" onClick={() => {this.onSubmit()}}value="Continue ordering!" className="btn btn-warning" />
