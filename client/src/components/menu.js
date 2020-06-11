@@ -252,11 +252,13 @@ export default class MenuList extends Component {
 
     editOrderConfirmed(id){
         var newID = Number(this.state.orderCounter, 10) - 1;
-        var currentMain = this.state.currentSelection;
-        var currentSide = this.state.selectedSideDish;
-        var currentC = this.state.currentCart;
+        var currentMain = this.state.currentSelection.splice();
+        var currentSide = this.state.selectedSideDish.splice();
+        var currentC = this.state.currentCart.splice();
         var selected = this.state.selectedItems;
         var newOrderId = selected[selected.length-1].OrderNum;
+        var emptyCart = [];
+        this.setState({currentSelection: emptyCart, currentCart: emptyCart, selectedSideDish: emptyCart, mainChecked: false});
         
         for(var i = 0; i < currentC.length; i++){
             if(currentC[i].type == "main"){
@@ -265,7 +267,6 @@ export default class MenuList extends Component {
                 document.getElementById(currentC[i].SideId).checked = false;
             }
         }
-        this.setState({currentSelection: [], currentCart: [], selectedSideDish: [], mainChecked: false});
         for(var i = 0; i < selected.length; i++){
             if(selected[i].OrderNum == id && selected[i].type == "main"){
                 currentMain.push(selected[i]);
@@ -490,7 +491,6 @@ export default class MenuList extends Component {
         var currentSelected = this.state.currentCart;
         currentSelected.push({OrderNum: Number(this.state.orderCounter, 10), completed: 'true'});
         var combined = this.state.selectedItems.concat(currentSelected);
-        console.log(combined);
         this.setState({selectedItems: combined, itemAddedToCart: true});
         var incrementOrderNo = Number(this.state.orderCounter, 10);
         incrementOrderNo = incrementOrderNo+1;

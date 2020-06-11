@@ -31,9 +31,9 @@ function App() {
                   <Link to="/create" className="nav-link">Create Todo</Link>
                 </li> */}
                 {/* hidden */}
-                <li className="navbar-item">
+                {/* <li className="navbar-item">
                   <Link to="/menu" className="nav-link">Menu</Link>
-                </li>
+                </li> */}
               </ul>
             </div>
           </nav>
