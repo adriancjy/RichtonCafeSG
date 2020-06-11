@@ -251,6 +251,10 @@ export default class MenuList extends Component {
     }
 
     editOrderConfirmed(id){
+        var checkboxes = document.getElementsByClassName('checkbox');
+        for(var x = 0; x < checkboxes.length; x++){
+            checkboxes[x].checked = false;
+        }
         var newID = Number(this.state.orderCounter, 10) - 1;
         var currentMain = this.state.currentSelection.splice();
         var currentSide = this.state.selectedSideDish.splice();
