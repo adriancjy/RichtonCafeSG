@@ -40,13 +40,15 @@ export default class Payment extends Component {
         {this.state.retrieved ? (
         <form onSubmit={this.onSubmit}>
         <div className="form-group">
-            <h3>welcome to Richton Cafe ordering website. Please enter your mobile number and press next to continue:</h3>
+            <h3>Welcome to Richton Cafe ordering website.</h3>
+            <h5>Please enter your mobile number and press next to continue:</h5>
         <br/>
         <input  type="text"
             className="form-control"
             value={this.state.phoneNum}
             onChange={this.onChangePhoneNum}
             />
+            <br/>
         <div className="form-group">
                         <input type="submit" value="i am ready to order!" className="btn btn-primary" />
         </div>

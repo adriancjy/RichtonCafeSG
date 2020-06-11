@@ -101,7 +101,7 @@ const MainOrders = props => (
             <tr>
             {props.selectedorder.completed == 'true' && 
                 <td>
-                    <input type="submit" value="Edit" className="btn btn-warning" onClick={() => { window.menuComponent.testFunc(props.selectedorder.OrderNum)}}></input>
+                    <input type="submit" value="Edit" className="btn btn-warning" onClick={() => { window.menuComponent.editOrder(props.selectedorder.OrderNum)}}></input>
                     <input type="submit" value="Delete" className="btn btn-danger" onClick={() => { window.menuComponent.deleteOrder(props.selectedorder.OrderNum)}}></input>
                 </td>}
             </tr>
@@ -234,14 +234,92 @@ export default class MenuList extends Component {
         }
 
 
-    editOrder(id){}
+    editOrder(id){
+        confirmAlert({
+            title: 'Do you want to edit this order?',
+            message: 'Clicking yes will remove your current selection!',
+            buttons: [
+              {
+                label: 'Yes',
+                onClick: () => this.editOrderConfirmed(id)
+              },
+              {
+                label: "No"
+              }
+            ]
+          });
+    }
+
+    editOrderConfirmed(id){
+        var newID = Number(this.state.orderCounter, 10) - 1;
+        var currentMain = this.state.currentSelection;
+        var currentSide = this.state.selectedSideDish;
+        var currentC = this.state.currentCart;
+        var selected = this.state.selectedItems;
+        var newOrderId = selected[selected.length-1].OrderNum;
+        
+        for(var i = 0; i < currentC.length; i++){
+            if(currentC[i].type == "main"){
+                document.getElementById(currentC[i].MainId).checked = false;
+            }else{
+                document.getElementById(currentC[i].SideId).checked = false;
+            }
+        }
+        this.setState({currentSelection: [], currentCart: [], selectedSideDish: [], mainChecked: false});
+        for(var i = 0; i < selected.length; i++){
+            if(selected[i].OrderNum == id && selected[i].type == "main"){
+                currentMain.push(selected[i]);
+                currentC.push(selected[i]);
+                document.getElementById(selected[i].MainId).checked = true;
+            }else if(selected[i].OrderNum == id && selected[i].type == "nomain"){
+                currentMain.push(selected[i]);
+                currentC.push(selected[i]);
+            }else if(selected[i].OrderNum == id && selected[i].type == "side"){
+                currentSide.push(selected[i]);
+                currentC.push(selected[i]);
+                document.getElementById(selected[i].SideId).checked = true;
+            }
+        }
+        selected = selected.filter(item => item.OrderNum !== id);
+        for(var i = 0; i < selected.length; i++){
+            if(selected[i].OrderNum > id){
+            selected[i].OrderNum = selected[i].OrderNum - 1;
+            }
+        }
+        for(var i = 0; i < currentC.length; i++){
+            currentC[i].OrderNum = newOrderId;
+        }
+        this.setState({orderCounter: newID});
+        localStorage.setItem("numOfOrders", newID);
+        this.setState({currentCart: currentC, currentSelection: currentMain, selectedSideDish: currentSide, mainChecked: true, selectedItems: selected});
+
+    }
 
     deleteOrder(id){
+        confirmAlert({
+            title: 'Do you want to remove this order?',
+            message: 'Clicking yes will remove your selected order from the cart!',
+            buttons: [
+              {
+                label: 'Yes',
+                onClick: () => this.deleteOrderConfirmed(id)
+              },
+              {
+                label: "No"
+              }
+            ]
+          });
+    }
+
+    deleteOrderConfirmed(id){
         var newID = Number(this.state.orderCounter, 10) - 1;
         this.setState({orderCounter: newID});
         var selectedOrder = this.state.selectedItems.filter(item => item.OrderNum !== id);
         var current = this.state.currentCart;
         var currentSel = this.state.currentSelection;
+        if(selectedOrder.length == 0){
+            this.setState({iteminCart: false});
+        }else{
         for(var i = 0; i < selectedOrder.length; i++){
             if(selectedOrder[i].OrderNum > id){
                 selectedOrder[i].OrderNum = selectedOrder[i].OrderNum - 1;
@@ -249,7 +327,7 @@ export default class MenuList extends Component {
                 selectedOrder[i].OrderNum = selectedOrder[i].OrderNum - 1;
             }
         }
-
+    }
         if(current.length > 0){
             for(var i = 0; i < current.length; i++){
                 var newOID = current[i].OrderNum - 1;
@@ -263,10 +341,8 @@ export default class MenuList extends Component {
                 currentSel[i].OrderNum = newOID;
             }
         }
-        // var allCB = document.getElementsByClassName("checkbox");
-        // for(i = 0; i < allCB.length; i++){
-        //      allCB[i].checked = false;
-        // }
+        
+        
         localStorage.setItem("currentOrders", JSON.stringify(selectedOrder));
         localStorage.setItem("numOfOrders", newID);
         this.setState({selectedItems: selectedOrder, orderCounter: newID, currentCart: current, currentSelection: currentSel});
@@ -414,6 +490,7 @@ export default class MenuList extends Component {
         var currentSelected = this.state.currentCart;
         currentSelected.push({OrderNum: Number(this.state.orderCounter, 10), completed: 'true'});
         var combined = this.state.selectedItems.concat(currentSelected);
+        console.log(combined);
         this.setState({selectedItems: combined, itemAddedToCart: true});
         var incrementOrderNo = Number(this.state.orderCounter, 10);
         incrementOrderNo = incrementOrderNo+1;
