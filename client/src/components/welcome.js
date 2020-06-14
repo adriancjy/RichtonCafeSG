@@ -23,6 +23,7 @@ export default class Payment extends Component {
 
     componentDidMount(){
         this.setState({retrieved: true});
+        localStorage.clear();
     }
 
     onChangePhoneNum(e){
