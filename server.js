@@ -8,6 +8,7 @@ const apiRoute = express.Router();
 let Menu = require('./model/menu.model');
 let SideDish = require('./model/sidedish.model');
 let Order = require('./model/order.model');
+let Additional = require('./model/additional.model');
 app.use(cors());
 
 app.use(bodyParser.json());
@@ -38,6 +39,18 @@ apiRoute.route('/richton/getMenuData').get(function(req, res) {
 
 apiRoute.route('/richton/getSideDish').get(function(req, res) {
     SideDish.find(function(err, menu) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.json(menu);
+        }
+    });
+});
+
+
+//Richton Additional API
+apiRoute.route('/richton/getAdditional').get(function(req, res) {
+    Additional.find(function(err, menu) {
         if (err) {
             console.log(err);
         } else {

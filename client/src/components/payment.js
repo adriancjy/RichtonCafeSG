@@ -55,6 +55,9 @@ const OrderSummary = props => (
             <td style={cartStyle}>{props.selectedsummary.slabel}</td>
             <td style={cartStyle2}>{props.selectedsummary.sprice}</td>
             </tr>
+            <tr>
+            <td style={cartStyle}><i>{props.selectedsummary.alabel}</i></td>
+            </tr>
         </tbody>              
     </table> 
 

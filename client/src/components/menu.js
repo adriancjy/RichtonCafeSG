@@ -59,6 +59,14 @@ const SideDish = props => (
 )
 
 
+const Additional = props => (
+    <tr>
+        <td>{props.additional.menu_item_name}</td>
+        <td><input type="checkbox" className="checkbox" id={props.additional._id} onClick={() => { window.menuComponent.onClickAdditionalCheckbox(props.additional._id, props.additional.menu_item_name, props.additional.menu_item_price) }} /></td>
+    </tr>
+)
+
+
 const MainOrders = props => (
     <table>
         {props.selectedorder.type == "main" && <thead>
@@ -95,6 +103,9 @@ const MainOrders = props => (
             <tr>
             <td style={cartStyle}>{props.selectedorder.slabel}</td>
             <td>{props.selectedorder.sprice}</td>
+            </tr>
+            <tr>
+            <td style={cartStyle}><i>{props.selectedorder.alabel}</i></td>
             </tr>
         </tbody>
         <tfoot>
@@ -134,6 +145,9 @@ const CurrentCart = props => (
             <td style={cartStyle}>{props.currentselect.slabel}</td>
             <td>{props.currentselect.sprice}</td>
             </tr>
+            <tr>
+            <td style={cartStyle}><i>{props.currentselect.alabel}</i></td>
+            </tr>
         </tbody>
               
     </table> 
@@ -169,6 +183,7 @@ export default class MenuList extends Component {
             edit: true,
             checkboxMenuItems: [],
             sideDishCheckBox: [],
+            additionalCheckBox: [],
             currentSelection: [],
             tableHidden: "none",
             retrieved: false,
@@ -184,7 +199,9 @@ export default class MenuList extends Component {
             totalPriceCal: 0,
             currentCart: [],
             itemAddedToCart: false,
-            phoneNo: ''
+            phoneNo: '',
+            additionalList: [],
+            selectedAdditionalOptions: []
         };
         this.onClickCheckbox = this.onClickCheckbox.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -229,6 +246,16 @@ export default class MenuList extends Component {
                 console.log(error);
             })
 
+            //Additional
+            axios.get('/api/richton/getAdditional')
+            .then(response => {
+                this.setState({ additionalList: response.data, retrieved: true });
+                this.mapAdditionaltoArray();
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+
             var key = this.props.location.state.phoneNo;
             this.setState({phoneNo: key});
         }
@@ -258,6 +285,7 @@ export default class MenuList extends Component {
         var newID = Number(this.state.orderCounter, 10) - 1;
         var currentMain = this.state.currentSelection.splice();
         var currentSide = this.state.selectedSideDish.splice();
+        var currentOpt = this.state.selectedAdditionalOptions.splice();
         var currentC = this.state.currentCart.splice();
         var selected = this.state.selectedItems;
         var newOrderId = selected[selected.length-1].OrderNum;
@@ -267,8 +295,11 @@ export default class MenuList extends Component {
         for(var i = 0; i < currentC.length; i++){
             if(currentC[i].type == "main"){
                 document.getElementById(currentC[i].MainId).checked = false;
-            }else{
+            }else if(currentC[i].type == "side"){
                 document.getElementById(currentC[i].SideId).checked = false;
+            }else{
+                document.getElementById(currentC[i].AddId).checked = false;
+
             }
         }
         for(var i = 0; i < selected.length; i++){
@@ -283,6 +314,11 @@ export default class MenuList extends Component {
                 currentSide.push(selected[i]);
                 currentC.push(selected[i]);
                 document.getElementById(selected[i].SideId).checked = true;
+            }else if(selected[i].OrderNum == id && selected[i].type == "additional"){
+                console.log(selected[i]);
+                currentOpt.push(selected[i]);
+                currentC.push(selected[i]);
+                document.getElementById(selected[i].AddId).checked = true;
             }
         }
         selected = selected.filter(item => item.OrderNum !== id);
@@ -296,7 +332,7 @@ export default class MenuList extends Component {
         }
         this.setState({orderCounter: newID});
         localStorage.setItem("numOfOrders", newID);
-        this.setState({currentCart: currentC, currentSelection: currentMain, selectedSideDish: currentSide, mainChecked: true, selectedItems: selected});
+        this.setState({currentCart: currentC, currentSelection: currentMain, selectedSideDish: currentSide, selectedAdditionalOptions: currentOpt, mainChecked: true, selectedItems: selected});
 
     }
 
@@ -367,6 +403,13 @@ export default class MenuList extends Component {
         })
     }
 
+    //Additional Options
+    additionalOptionsList(){
+        return this.state.additionalList.map(function (additionalOptions, i){
+            return <Additional additional={additionalOptions} key={i}/>;
+        })
+    }
+
     //Added Cart
     selectedOrderReturnList(){
         return this.state.selectedItems.map(function (selectedOrders, i) {
@@ -382,6 +425,7 @@ export default class MenuList extends Component {
     }
 
 
+    ///pending do i need this portion???
     //Richton Main dish
     mapObjecttoArray() {
         _.map(this.state.menuList, item => {
@@ -393,6 +437,13 @@ export default class MenuList extends Component {
     mapSideDishtoArray() {
         _.map(this.state.sideDishList, item => {
             this.setState({ sideDishCheckBox: [...this.state.sideDishCheckBox, { label: `${item.menu_item_name}`, value: `${item.menu_item_price}` }] });
+        })
+    }
+
+    //Richton Additional
+    mapAdditionaltoArray() {
+        _.map(this.state.sideDishList, item => {
+            this.setState({ additionalCheckBox: [...this.state.additionalCheckBox, { label: `${item.menu_item_name}` }] });
         })
     }
 
@@ -443,7 +494,6 @@ export default class MenuList extends Component {
     }
 
     //side
-    //Fix the async property of setstate, not showing updated current selection.
     onClickSideDishCheckbox(id, foodName, foodPrice) {
         const selectedSide = this.state.selectedSideDish;
         const mainSelected = this.state.currentSelection;
@@ -461,13 +511,41 @@ export default class MenuList extends Component {
             this.setState({currentCart: current});
         }else{
             if(selectedSide.some(e => e.slabel === foodName)){
-                this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item.slabel !== foodName), currentCart: this.state.currentCart.filter(item => item.slabel !== foodName),});
+                this.setState({selectedSideDish: this.state.selectedSideDish.filter(item => item.slabel !== foodName), currentCart: this.state.currentCart.filter(item => item.slabel !== foodName), totalPriceCal: priceCalculate - Number(foodPrice,10)});
             }else{
                 this.setState({ selectedSideDish: [...this.state.selectedSideDish, {OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"}], iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice,10)});
                 var sideO = selectedSide.concat({OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side"});
                 var current = [...mainSelected,...sideO];
                 this.setState({currentCart: current});
             }    
+        }
+    }
+
+
+    //Additional checkbox click
+    onClickAdditionalCheckbox(id, option, price){
+        var currentCartSel = this.state.currentCart;
+        var selOptions = this.state.selectedAdditionalOptions;
+        var orderNo = Number(this.state.orderCounter, 10);
+        var priceCalculate = Number(this.state.totalPriceCal,10);
+        if(currentCartSel.length == 0){
+            document.getElementById("totalAlert").style["display"] = "block";
+            document.getElementById(id).checked = false;
+        }else{
+            document.getElementById("totalAlert").style["display"] = "none";
+            if(selOptions.length == 0){
+                this.setState({selectedAdditionalOptions: [...this.state.selectedAdditionalOptions, {OrderNum: orderNo, AddId: id, alabel: option, aprice: price, type: "additional"}], totalPriceCal: priceCalculate + Number(price,10)});
+                var addO = selOptions.concat({OrderNum: orderNo, AddId: id, alabel: option, aprice: price, type: "additional"});
+                this.setState({currentCart: [...this.state.currentCart, {OrderNum: orderNo, AddId: id, alabel: option, aprice: price, type: "additional"}], selectedAdditionalOptions: addO});
+            }else{
+                if(selOptions.some(e => e.alabel === option)){
+                    this.setState({selectedAdditionalOptions: this.state.selectedAdditionalOptions.filter(item => item.alabel !== option), currentCart: this.state.currentCart.filter(item => item.alabel !== option)});
+                }else{
+                    this.setState({selectedAdditionalOptions: [...this.state.selectedAdditionalOptions, {OrderNum: orderNo, AddId: id, alabel: option, aprice: price, type: "additional"}], totalPriceCal: priceCalculate + Number(price,10)});
+                    var addO = selOptions.concat({OrderNum: orderNo, AddId: id, alabel: option, aprice: price, type: "additional"});
+                    this.setState({currentCart: [...this.state.currentCart, {OrderNum: orderNo, AddId: id, alabel: option, aprice: price, type: "additional"}], selectedAdditionalOptions: addO});
+                }
+            }
         }
     }
 
@@ -655,7 +733,7 @@ export default class MenuList extends Component {
                                 </div></Card.Body>
                         </Accordion.Collapse>
                     </Card>
-                    {/* <Card>
+                    <Card>
                         <Accordion.Toggle as={Card.Header} eventKey="2">
                             Additional Options
                                     </Accordion.Toggle>
@@ -665,18 +743,16 @@ export default class MenuList extends Component {
                                         <thead>
                                             <tr>
                                                 <th>Name</th>
-                                                <th>Price</th>
-                                                <th>Availability</th>
                                                 <th>Select</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            { this.sideDishItemList() } 
+                                            { this.additionalOptionsList() } 
                                         </tbody>
                                     </table>
                                 </div></Card.Body>
                         </Accordion.Collapse>
-                    </Card> */}
+                    </Card>
                 </Accordion>
                 <div className="form-group">
                 <input type="submit" onClick={() => {this.onSubmit()}}value="Continue ordering!" className="btn btn-warning" />
