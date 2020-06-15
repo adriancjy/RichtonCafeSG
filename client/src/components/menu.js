@@ -373,7 +373,7 @@ export default class MenuList extends Component {
 
     quantityMainMinus(qid, id, foodName, foodPrice) {
         var selectedSide = this.state.selectedSideDish;
-        var currentSel = this.state.currentCart;
+        var selOptions = this.state.selectedAdditionalOptions;
         var mainSelected = this.state.currentSelection;
         var priceCalculate = Number(this.state.totalPriceCal, 10);
         var orderNo = Number(this.state.orderCounter, 10);
@@ -388,14 +388,13 @@ export default class MenuList extends Component {
                     }
                 }
                 this.setState({ currentSelection: mainSelected, iteminCart: true, mainChecked: true, totalPriceCal: priceCalculate - Number(foodPrice, 10) });
-                var current = [...mainSelected, ...selectedSide];
+                var current = [...mainSelected, ...selectedSide,...selOptions];
                 this.setState({ currentCart: current });
             }else if(newQuantity == 0){
                 quantityQID.value = "";
                 if(this.state.currentCart.length == 0){
                     this.setState({iteminCart: false, sideChecked: false, mainChecked: false});
                 }
-                var newASD = currentSel.filter(e => e.mlabel !== foodName);
                 this.setState({currentSelection: this.state.currentSelection.filter(e => e.mlabel !== foodName), currentCart: this.state.currentCart.filter(e => e.mlabel !== foodName), totalPriceCal: priceCalculate - Number(foodPrice, 10) });
             }
         }
@@ -406,6 +405,7 @@ export default class MenuList extends Component {
 
     quantityMainPlus(qid, id, foodName, foodPrice) {
         var orderNo = Number(this.state.orderCounter, 10);
+        var selOptions = this.state.selectedAdditionalOptions;
         var priceCalculate = Number(this.state.totalPriceCal, 10);
         var currentSelect = this.state.currentSelection;
         var currentCartItems = this.state.currentCart;
@@ -426,13 +426,19 @@ export default class MenuList extends Component {
                         currentCartItems[i].mquantity = quantityQID.value;
                     }
                 }
-                this.setState({ currentCart: currentCartItems, currentSelection: currentSelect, mainChecked: true, iteminCart: true, totalPriceCal: priceCalculate + Number(foodPrice, 10) });
+                this.setState({currentSelection: currentSelect, mainChecked: true, iteminCart: true, totalPriceCal: priceCalculate + Number(foodPrice, 10) });
+                var current = [...currentSelect, ...currentSide, ...selOptions];
+                this.setState({currentCart: current});
             } else {
-                this.setState({ currentSelection: [...this.state.currentSelection, { OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main", mquantity: quantityQID.value }], currentCart: [...this.state.currentCart, { OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main", mquantity: quantityQID.value }], currentSelection: [...this.state.currentSelection, { OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main", mquantity: quantityQID.value }], mainChecked: true, iteminCart: true, totalPriceCal: priceCalculate + Number(foodPrice, 10) });
+                var currOrder = currentSelect.concat({ OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main", mquantity: quantityQID.value });
+                this.setState({ currentSelection: [...this.state.currentSelection, { OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main", mquantity: quantityQID.value }], currentSelection: [...this.state.currentSelection, { OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main", mquantity: quantityQID.value }], mainChecked: true, iteminCart: true, totalPriceCal: priceCalculate + Number(foodPrice, 10) });
+                var current = [...currOrder, ...currentSide, ...selOptions];
+                this.setState({currentCart: current});
+                console.log(current);
             }
         }else{
             var filterCart = currentCartItems.filter(e => e.type !== "nomain");
-            var newCart = [{OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main", mquantity: quantityQID.value}].concat(filterCart);
+            var newCart = [[{OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main", mquantity: quantityQID.value}].concat(filterCart), ...selOptions];
             this.setState({currentCart: newCart, currentSelection: [...this.state.currentSelection, { OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main", mquantity: quantityQID.value }], mainChecked: true, iteminCart: true, totalPriceCal: priceCalculate + Number(foodPrice, 10) });
         }
 
@@ -445,6 +451,7 @@ export default class MenuList extends Component {
     quantitySideMinus(qid, id, foodName, foodPrice) {
         var selectedSide = this.state.selectedSideDish;
         var mainSelected = this.state.currentSelection;
+        var selOptions = this.state.selectedAdditionalOptions;
         var priceCalculate = Number(this.state.totalPriceCal, 10);
         var checker = this.state.checkOnce;
         var alrSelectedItems = this.state.selectedItems;
@@ -460,12 +467,12 @@ export default class MenuList extends Component {
                     }
                 }
                 this.setState({ selectedSideDish: selectedSide, iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate - Number(foodPrice, 10) });
-                var current = [...mainSelected, ...selectedSide];
+                var current = [...mainSelected, ...selectedSide, ...selOptions];
                 this.setState({ currentCart: current });
             } else {
                 this.setState({ selectedSideDish: [...this.state.selectedSideDish, { OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side", quantity: quantityQID.value }], iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate - Number(foodPrice, 10) });
                 var sideO = selectedSide.concat({ OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side", quantity: quantityQID.value });
-                var current = [...mainSelected, ...sideO];
+                var current = [...mainSelected, ...sideO, ...selOptions];
                 this.setState({ currentCart: current });
 
             }
@@ -474,7 +481,7 @@ export default class MenuList extends Component {
             if (mainSelected.length == 0 && alrSelectedItems.length == 0 && selectedSide.length == 0) {
                 this.setState({ currentCart: [], selectedSideDish: this.state.selectedSideDish.filter(e => e.slabel !== foodName), iteminCart: false, mainChecked: false, sideChecked: false });
             } else if (mainSelected.length != 0) {
-                this.setState({ currentCart: this.state.currentCart.filter(e => e.slabel !== foodName) });
+                this.setState({ currentCart: this.state.currentCart.filter(e => e.slabel !== foodName), selectedSideDish: this.state.selectedSideDish.filter(e => e.slabel !== foodName) });
             } else if (selectedSide.length !== 0) {
                 this.setState({ currentCart: this.state.currentCart.filter(e => e.slabel !== foodName), selectedSideDish: this.state.selectedSideDish.filter(e => e.slabel !== foodName) });
             }
@@ -484,6 +491,7 @@ export default class MenuList extends Component {
     quantitySidePlus(qid, id, foodName, foodPrice) {
         var selectedSide = this.state.selectedSideDish;
         var mainSelected = this.state.currentSelection;
+        var selOptions = this.state.selectedAdditionalOptions;
         var priceCalculate = Number(this.state.totalPriceCal, 10);
         var checker = this.state.checkOnce;
         var orderNo = Number(this.state.orderCounter, 10);
@@ -502,13 +510,13 @@ export default class MenuList extends Component {
                 }
             }
             this.setState({ selectedSideDish: selectedSide, iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice, 10) });
-            var current = [...mainSelected, ...selectedSide];
+            var current = [...mainSelected, ...selectedSide, ...selOptions];
             this.setState({ currentCart: current });
 
         } else {
             this.setState({ selectedSideDish: [...this.state.selectedSideDish, { OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side", quantity: quantityQID.value }], iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice, 10) });
             var sideO = selectedSide.concat({ OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side", quantity: quantityQID.value });
-            var current = [...mainSelected, ...sideO];
+            var current = [...mainSelected, ...sideO, ... selOptions];
             this.setState({ currentCart: current });
         }
 
@@ -713,7 +721,6 @@ export default class MenuList extends Component {
             localStorage.setItem("currentOrders", JSON.stringify(combined));
             localStorage.setItem("iteminCart", this.state.iteminCart);
             localStorage.setItem("itemAddedToCart", this.state.itemAddedToCart);
-            console.log(this.state.totalPriceCal);
             window.location.reload(false);
         }
         
@@ -739,7 +746,7 @@ export default class MenuList extends Component {
 
     onCalculate() {
         localStorage.clear();
-        var currentItems = this.state.currentCart;
+        var currentItems = [{OrderNum: Number(this.state.orderCounter, 10), start: "true"}].concat(this.state.currentCart);
         currentItems.push({ OrderNum: Number(this.state.orderCounter, 10), completed: 'true' });
         var totalItems = this.state.selectedItems;
         var combined = totalItems.concat(currentItems);
