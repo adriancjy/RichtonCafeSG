@@ -1,5 +1,4 @@
-import React, { Component, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import React, { Component } from 'react';
 import axios from 'axios';
 import _ from "lodash";
 import Accordion from 'react-bootstrap/Accordion';
@@ -51,7 +50,7 @@ const Menu = props => (
         <td>{props.menu.menu_item_name}</td>
         <td>{props.menu.menu_item_price}</td>
         <td>{props.menu.menu_item_availability}</td>
-        <td><input id="quantityMainM" type="button" value="-" onClick={() => { window.menuComponent.quantityMainMinus("quantityMain_" + props.menu._id, props.menu._id, props.menu.menu_item_name, props.menu.menu_item_price) }} /><input id={"quantityMain_" + props.menu._id} style={tbStyle} type="text" onKeyDown={window.menuComponent.tbKeyPressed()} /><input id="quantityMainP" type="button" value="+" onClick={() => { window.menuComponent.quantityMainPlus("quantityMain_" + props.menu._id, props.menu._id, props.menu.menu_item_name, props.menu.menu_item_price) }} /></td>
+        <td><input id="quantityMainM" type="button" value="-" onClick={() => { window.menuComponent.quantityMainMinus("quantityMain_" + props.menu._id, props.menu._id, props.menu.menu_item_name, props.menu.menu_item_price) }} /><input id={"quantityMain_" + props.menu._id} style={tbStyle} type="text" className="quantityTB" readOnly="true" /><input id="quantityMainP" type="button" value="+" onClick={() => { window.menuComponent.quantityMainPlus("quantityMain_" + props.menu._id, props.menu._id, props.menu.menu_item_name, props.menu.menu_item_price) }} /></td>
     </tr>
 )
 
@@ -60,7 +59,7 @@ const SideDish = props => (
         <td>{props.sidedish.menu_item_name}</td>
         <td>{props.sidedish.menu_item_price}</td>
         <td>{props.sidedish.menu_item_availability}</td>
-        <td><input id="quantitySideM" type="button" value="-" onClick={() => { window.menuComponent.quantitySideMinus("quantitySide_" + props.sidedish._id, props.sidedish._id, props.sidedish.menu_item_name, props.sidedish.menu_item_price) }} /><input id={"quantitySide_" + props.sidedish._id} style={tbStyle} type="text" onKeyDown={window.menuComponent.tbKeyPressed()} /><input id="quantitySideP" type="button" value="+" onClick={() => { window.menuComponent.quantitySidePlus("quantitySide_" + props.sidedish._id, props.sidedish._id, props.sidedish.menu_item_name, props.sidedish.menu_item_price) }} /></td>
+        <td><input id="quantitySideM" type="button" value="-" onClick={() => { window.menuComponent.quantitySideMinus("quantitySide_" + props.sidedish._id, props.sidedish._id, props.sidedish.menu_item_name, props.sidedish.menu_item_price) }} /><input id={"quantitySide_" + props.sidedish._id} style={tbStyle} type="text" className="quantityTB" readOnly="true" /><input id="quantitySideP" type="button" value="+" onClick={() => { window.menuComponent.quantitySidePlus("quantitySide_" + props.sidedish._id, props.sidedish._id, props.sidedish.menu_item_name, props.sidedish.menu_item_price) }} /></td>
     </tr>
 )
 
@@ -105,7 +104,7 @@ const MainOrders = props => (
             <tr>
                 {props.selectedorder.completed == 'true' &&
                     <td>
-                        {/* <input type="submit" value="Edit" className="btn btn-warning" onClick={() => { window.menuComponent.editOrder(props.selectedorder.OrderNum) }}></input> */}
+                        <input type="submit" value="Edit" className="btn btn-warning" onClick={() => { window.menuComponent.editOrder(props.selectedorder.OrderNum) }}></input>
                         <input type="submit" value="Delete" className="btn btn-danger" onClick={() => { window.menuComponent.deleteOrder(props.selectedorder.OrderNum) }}></input>
                     </td>}
             </tr>
@@ -183,7 +182,6 @@ export default class MenuList extends Component {
             additionalList: [],
             selectedAdditionalOptions: []
         };
-        this.onClickCheckbox = this.onClickCheckbox.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
     }
 
@@ -260,9 +258,9 @@ export default class MenuList extends Component {
     }
 
     editOrderConfirmed(id) {
-        var checkboxes = document.getElementsByClassName('checkbox');
-        for (var x = 0; x < checkboxes.length; x++) {
-            checkboxes[x].checked = false;
+        var quantityTB = document.getElementsByClassName('quantityTB');
+        for (var x = 0; x < quantityTB.length; x++) {
+            quantityTB[x].value = "";
         }
         var newID = Number(this.state.orderCounter, 10) - 1;
         var currentMain = this.state.currentSelection.splice();
@@ -273,29 +271,18 @@ export default class MenuList extends Component {
         var newOrderId = selected[selected.length - 1].OrderNum;
         var emptyCart = [];
         this.setState({ currentSelection: emptyCart, currentCart: emptyCart, selectedSideDish: emptyCart, mainChecked: false });
-
-        for (var i = 0; i < currentC.length; i++) {
-            if (currentC[i].type == "main") {
-                document.getElementById(currentC[i].MainId).checked = false;
-            } else if (currentC[i].type == "side") {
-                document.getElementById(currentC[i].SideId).checked = false;
-            } else {
-                document.getElementById(currentC[i].AddId).checked = false;
-
-            }
-        }
         for (var i = 0; i < selected.length; i++) {
             if (selected[i].OrderNum == id && selected[i].type == "main") {
                 currentMain.push(selected[i]);
                 currentC.push(selected[i]);
-                document.getElementById(selected[i].MainId).checked = true;
+                document.getElementById("quantityMain_" + selected[i].MainId).value = selected[i].mquantity;
             } else if (selected[i].OrderNum == id && selected[i].type == "nomain") {
                 currentMain.push(selected[i]);
                 currentC.push(selected[i]);
             } else if (selected[i].OrderNum == id && selected[i].type == "side") {
                 currentSide.push(selected[i]);
                 currentC.push(selected[i]);
-                document.getElementById(selected[i].SideId).checked = true;
+                document.getElementById("quantitySide_" + selected[i].SideId).value = selected[i].quantity;
             } else if (selected[i].OrderNum == id && selected[i].type == "additional") {
                 currentOpt.push(selected[i]);
                 currentC.push(selected[i]);
@@ -434,7 +421,6 @@ export default class MenuList extends Component {
                 this.setState({ currentSelection: [...this.state.currentSelection, { OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main", mquantity: quantityQID.value }], currentSelection: [...this.state.currentSelection, { OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main", mquantity: quantityQID.value }], mainChecked: true, iteminCart: true, totalPriceCal: priceCalculate + Number(foodPrice, 10) });
                 var current = [...currOrder, ...currentSide, ...selOptions];
                 this.setState({currentCart: current});
-                console.log(current);
             }
         }else{
             var filterCart = currentCartItems.filter(e => e.type !== "nomain");
@@ -579,85 +565,6 @@ export default class MenuList extends Component {
             this.setState({ additionalCheckBox: [...this.state.additionalCheckBox, { label: `${item.menu_item_name}` }] });
         })
     }
-
-    //Main
-    //Fix the unchecking all become empty
-    onClickCheckbox(id, foodName, foodPrice) {
-        const nothingSelectedValue = this.state.nothingSelected;
-        var orderNo = Number(this.state.orderCounter, 10);
-        var mainO = [{ OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main" }];
-        var sideO = this.state.selectedSideDish;
-        var checkCart = this.state.selectedItems;
-        var currentCartItems = this.state.currentCart;
-        var priceCalculate = Number(this.state.totalPriceCal, 10);
-        if (nothingSelectedValue) {
-            document.getElementById("totalAlert").style["display"] = "none";
-        }
-        const checked = this.state.mainChecked;
-        if (!checked) {
-            if (currentCartItems.some(e => e.type == "nomain")) {
-                this.setState({ currentCart: this.state.currentCart.filter(e => e.type !== "nomain") });
-            }
-            this.setState({ currentSelection: [...this.state.currentSelection, { OrderNum: orderNo, MainId: id, mlabel: foodName, mprice: foodPrice, type: "main" }], mainChecked: true, iteminCart: true, totalPriceCal: priceCalculate + Number(foodPrice, 10) });
-            var current = [...mainO, ...sideO];
-            this.setState({ currentCart: current });
-            document.getElementById("alertBox").style["display"] = "none";
-        } else {
-            const item = this.state.currentSelection;
-            if (item.some(e => e.mlabel === foodName)) {
-                this.setState({ currentSelection: [], currentCart: [], selectedSideDish: [], mainChecked: false, totalPriceCal: 0 });
-                if (checkCart.length > 0) {
-                    this.setState({ iteminCart: true });
-                } else {
-                    this.setState({ iteminCart: false });
-                }
-                this.uncheckSideDish();
-            } else {
-                var x = document.getElementById(id);
-                x.checked = false;
-                document.getElementById("alertBox").style["display"] = "block";
-            }
-
-        }
-    }
-
-    uncheckSideDish() {
-        var sideDish = this.state.selectedSideDish;
-        for (var i = 0; i < sideDish.length; i++) {
-            if (sideDish[i].type == "side") {
-                document.getElementById(sideDish[i].SideId).checked = false;
-            }
-        }
-    }
-
-    //side
-    onClickSideDishCheckbox(id, foodName, foodPrice) {
-        const selectedSide = this.state.selectedSideDish;
-        const mainSelected = this.state.currentSelection;
-        var priceCalculate = Number(this.state.totalPriceCal, 10);
-        var checker = this.state.checkOnce;
-        var orderNo = Number(this.state.orderCounter, 10);
-        if (mainSelected.length == 0 && !checker) {
-            var pushEmpty = this.state.selectedSideDish.push({ OrderNum: orderNo, MainId: 0, label: "No main selected", nmprice: 0, type: "nomain" })
-            this.setState({ selectedSideDish: pushEmpty, checkOnce: true, totalPriceCal: priceCalculate + 0 });
-        }
-        if (selectedSide.length == 0) {
-            this.setState({ selectedSideDish: [...this.state.selectedSideDish, { OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side" }], iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice, 10) });
-            var sideO = selectedSide.concat({ OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side" });
-            var current = [...mainSelected, ...sideO];
-            this.setState({ currentCart: current });
-        } else {
-            if (selectedSide.some(e => e.slabel === foodName)) {
-                this.setState({ selectedSideDish: this.state.selectedSideDish.filter(item => item.slabel !== foodName), currentCart: this.state.currentCart.filter(item => item.slabel !== foodName), totalPriceCal: priceCalculate - Number(foodPrice, 10) });
-            } else {
-                this.setState({ selectedSideDish: [...this.state.selectedSideDish, { OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side" }], iteminCart: true, sideChecked: true, totalPriceCal: priceCalculate + Number(foodPrice, 10) });
-                var sideO = selectedSide.concat({ OrderNum: orderNo, SideId: id, slabel: foodName, sprice: foodPrice, type: "side" });
-                var current = [...mainSelected, ...sideO];
-                this.setState({ currentCart: current });
-            }
-        }
-    }
-
 
     //Additional checkbox click
     onClickAdditionalCheckbox(id, option, price) {
