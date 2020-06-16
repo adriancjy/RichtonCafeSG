@@ -14,7 +14,6 @@ export default class Payment extends Component {
 
         this.state = {
             retrieved: false,
-            phoneNum: ''
         }
         this.componentDidMount = this.componentDidMount.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -29,23 +28,29 @@ export default class Payment extends Component {
     onChangePhoneNum(e){
         if(e.target.value != ''){
             document.getElementById("totalAlert").style["display"] = "none";
-            this.setState({phoneNum: e.target.value});
         }
     }
 
     onSubmit(e){
         e.preventDefault();
-        if(this.state.phoneNum == ''){
+        const re = /^[0-9\b]+$/;
+        var x = document.getElementById("tbPhone");
+        if(x.value == ''){
             document.getElementById("totalAlert").style["display"] = "block";
         }else{
-            if(this.state.phoneNum.length > 8 || this.state.phoneNum.length < 8){
-                document.getElementById("invalidAlert").style["display"] = "block";
+            if(re.test(x.value)){
+                document.getElementById("totalAlert").style["display"] = "none";
+                if(x.value.length !== 8){
+                    document.getElementById("invalidAlert").style["display"] = "block";
+                }else{
+                    document.getElementById("totalAlert").style["display"] = "none";
+                    this.props.history.push({
+                        pathname: '/menu',
+                        state: {phoneNo: x.value}
+                      });
+                }
             }else{
-                this.props.history.push({
-                    pathname: '/menu',
-                    state: {phoneNo: this.state.phoneNum}
-                  });
-                this.setState({phoneNum: ''});
+                document.getElementById("invalidAlert").style["display"] = "block";
             }
         }
     }
@@ -70,9 +75,9 @@ export default class Payment extends Component {
         </Alert >
         </a>
         <input type="text"
+        id="tbPhone"
             className="form-control"
             placeholder="Please enter your 8-digit mobile number here!"
-            value={this.state.phoneNum}
             onChange={this.onChangePhoneNum}
             />
             <br/>
